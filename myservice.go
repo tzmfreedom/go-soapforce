@@ -24,20 +24,21 @@ type SObject struct {
 
 	Id *ID `xml:"Id,omitempty"`
 
-	Extra map[string]string
+	Fields map[string]string
 }
 
 func (s *SObject) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	start.Name.Local = "sObjects"
 	start.Name.Space = "urn:sobject.partner.soap.sforce.com"
 	e.EncodeToken(start)
-	e.EncodeElement(s.Type, xml.StartElement{ Name: xml.Name{ Local: "type" } })
+	e.EncodeElement(s.Type, xml.StartElement{Name: xml.Name{Local: "type"}})
 	if s.Id != nil {
-		e.EncodeElement(s.Id, xml.StartElement{ Name: xml.Name{ Local: "Id" } })
+		e.EncodeElement(s.Id, xml.StartElement{Name: xml.Name{Local: "Id"}})
 	}
-	if s.FieldsToNull != nil { }
-	for k, v := range s.Extra {
-		e.EncodeElement(v, xml.StartElement{ Name: xml.Name{ Local: k } })
+	if s.FieldsToNull != nil {
+	}
+	for k, v := range s.Fields {
+		e.EncodeElement(v, xml.StartElement{Name: xml.Name{Local: k}})
 	}
 	e.EncodeToken(start.End())
 	return nil

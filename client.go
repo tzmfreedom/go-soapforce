@@ -17,32 +17,32 @@ func NewClient() *Client {
 	}
 }
 
-func (c *Client) Login(u string, p string) *LoginResult {
+func (c *Client) Login(u string, p string) (*LoginResult, error) {
 	req := &Login{
 		Username: u,
 		Password: p,
 	}
 	res, err := c.soapClient.Login(req)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	c.sessionId = res.Result.SessionId
 	c.serverUrl = res.Result.ServerUrl
 	c.soapClient.SetServerUrl(res.Result.ServerUrl)
-	sessionHeader := &SessionHeader {
+	sessionHeader := &SessionHeader{
 		SessionId: res.Result.SessionId,
 	}
 	c.soapClient.SetHeader(&sessionHeader)
-	return res.Result
+	return res.Result, nil
 }
 
-func (c *Client) Create(s []*SObject) []*SaveResult {
+func (c *Client) Create(s []*SObject) ([]*SaveResult, error) {
 	req := &Create{
 		SObjects: s,
 	}
 	res, err := c.soapClient.Create(req)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return res.Result
+	return res.Result, nil
 }
