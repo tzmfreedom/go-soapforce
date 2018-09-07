@@ -4949,6 +4949,10 @@ func (service *Soap) SetHeader(header interface{}) {
 	service.client.AddHeader(header)
 }
 
+func (service *Soap) ClearHeader() {
+	service.client.ClearHeader()
+}
+
 // Error can be either of the following types:
 //
 //   - LoginFault
@@ -5962,6 +5966,10 @@ func NewSOAPClientWithTLSConfig(url string, tlsCfg *tls.Config, auth *BasicAuth)
 
 func (s *SOAPClient) AddHeader(header interface{}) {
 	s.headers = append(s.headers, header)
+}
+
+func (s *SOAPClient) ClearHeader() {
+	s.headers = nil
 }
 
 func (s *SOAPClient) Call(request, response interface{}) error {

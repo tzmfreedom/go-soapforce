@@ -11,12 +11,22 @@ go get github.com/tzmfreedom/go-soapforce
 ## Usage
 
 Initialize Client
-```
+```golang
 client := soapforce.NewClient()
 ```
 
-Login
+for sandbox
+```golang
+client.SetLoginUrl("test.salesforce.com")
 ```
+
+set api version
+```golang
+client.SetApiVersion("38.0")
+```
+
+Login
+```golang
 res, err := client.Login("username", "password")
 ```
 
@@ -26,11 +36,15 @@ sobjects := []*soapforce.SObject{
 	{
 		Type: "Account",
 		Fields: map[string]string{
-			"Name": "Hoge",
+			"Name": "Foo",
 		},
 	},
 }
 res, err := client.Create(sobjects)
+```
+
+Update
+```golang
 ```
 
 ## Contribute

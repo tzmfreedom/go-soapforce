@@ -9,16 +9,22 @@ import (
 
 func main() {
 	client := soapforce.NewClient()
-	res := client.Login(os.Getenv("SALESFORCE_USERNAME"), os.Getenv("SALESFORCE_PASSWORD"))
+	res, err := client.Login(os.Getenv("SALESFORCE_USERNAME"), os.Getenv("SALESFORCE_PASSWORD"))
+	if err != nil {
+		panic(err)
+	}
 	pp.Print(res)
 	sobjects := []*soapforce.SObject{
 		{
 			Type: "Account",
-			Extra: map[string]string{
+			Fields: map[string]string{
 				"Name": "Hoge",
 			},
 		},
 	}
-	sResult := client.Create(sobjects)
+	sResult, err := client.Create(sobjects)
+	if err != nil {
+		panic(err)
+	}
 	pp.Print(sResult)
 }
