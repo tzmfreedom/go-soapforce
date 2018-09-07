@@ -1201,8 +1201,6 @@ type Login struct {
 }
 
 type LoginResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com loginResponse"`
-
 	Result *LoginResult `xml:"result,omitempty"`
 }
 
@@ -1213,8 +1211,6 @@ type DescribeSObject struct {
 }
 
 type DescribeSObjectResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com describeSObjectResponse"`
-
 	Result *DescribeSObjectResult `xml:"result,omitempty"`
 }
 
@@ -1225,8 +1221,6 @@ type DescribeSObjects struct {
 }
 
 type DescribeSObjectsResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com describeSObjectsResponse"`
-
 	Result *DescribeSObjectResult `xml:"result,omitempty"`
 }
 
@@ -1235,8 +1229,6 @@ type DescribeGlobal struct {
 }
 
 type DescribeGlobalResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com describeGlobalResponse"`
-
 	Result *DescribeGlobalResult `xml:"result,omitempty"`
 }
 
@@ -1539,8 +1531,6 @@ type SendEmail struct {
 }
 
 type SendEmailResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com sendEmailResponse"`
-
 	Result *SendEmailResult `xml:"result,omitempty"`
 }
 
@@ -1551,8 +1541,6 @@ type RenderEmailTemplate struct {
 }
 
 type RenderEmailTemplateResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com renderEmailTemplateResponse"`
-
 	Result *RenderEmailTemplateResult `xml:"result,omitempty"`
 }
 
@@ -1563,8 +1551,6 @@ type SendEmailMessage struct {
 }
 
 type SendEmailMessageResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com sendEmailMessageResponse"`
-
 	Result *SendEmailResult `xml:"result,omitempty"`
 }
 
@@ -1575,8 +1561,6 @@ type Update struct {
 }
 
 type UpdateResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com updateResponse"`
-
 	Result []*SaveResult `xml:"result,omitempty"`
 }
 
@@ -1589,8 +1573,6 @@ type Upsert struct {
 }
 
 type UpsertResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com upsertResponse"`
-
 	Result []*UpsertResult `xml:"result,omitempty"`
 }
 
@@ -1601,8 +1583,6 @@ type Merge struct {
 }
 
 type MergeResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com mergeResponse"`
-
 	Result []*MergeResult `xml:"result,omitempty"`
 }
 
@@ -1613,8 +1593,6 @@ type Delete struct {
 }
 
 type DeleteResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com deleteResponse"`
-
 	Result []*DeleteResult `xml:"result,omitempty"`
 }
 
@@ -1625,8 +1603,6 @@ type Undelete struct {
 }
 
 type UndeleteResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com undeleteResponse"`
-
 	Result []*UndeleteResult `xml:"result,omitempty"`
 }
 
@@ -1649,8 +1625,6 @@ type Process struct {
 }
 
 type ProcessResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com processResponse"`
-
 	Result []*ProcessResult `xml:"result,omitempty"`
 }
 
@@ -1661,8 +1635,6 @@ type PerformQuickActions struct {
 }
 
 type PerformQuickActionsResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com performQuickActionsResponse"`
-
 	Result []*PerformQuickActionResult `xml:"result,omitempty"`
 }
 
@@ -1729,8 +1701,6 @@ type Retrieve struct {
 }
 
 type RetrieveResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com retrieveResponse"`
-
 	Result []*SObject `xml:"result,omitempty"`
 }
 
@@ -1773,8 +1743,6 @@ type GetDeleted struct {
 }
 
 type GetDeletedResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com getDeletedResponse"`
-
 	Result *GetDeletedResult `xml:"result,omitempty"`
 }
 
@@ -1805,8 +1773,6 @@ type Query struct {
 }
 
 type QueryResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com queryResponse"`
-
 	Result *QueryResult `xml:"result,omitempty"`
 }
 
@@ -1817,8 +1783,6 @@ type QueryAll struct {
 }
 
 type QueryAllResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com queryAllResponse"`
-
 	Result *QueryResult `xml:"result,omitempty"`
 }
 
@@ -1829,8 +1793,6 @@ type QueryMore struct {
 }
 
 type QueryMoreResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com queryMoreResponse"`
-
 	Result *QueryResult `xml:"result,omitempty"`
 }
 
@@ -1841,8 +1803,6 @@ type Search struct {
 }
 
 type SearchResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com searchResponse"`
-
 	Result *SearchResult `xml:"result,omitempty"`
 }
 
@@ -1851,8 +1811,6 @@ type GetServerTimestamp struct {
 }
 
 type GetServerTimestampResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com getServerTimestampResponse"`
-
 	Result *GetServerTimestampResult `xml:"result,omitempty"`
 }
 
@@ -1865,8 +1823,6 @@ type SetPassword struct {
 }
 
 type SetPasswordResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com setPasswordResponse"`
-
 	Result *SetPasswordResult `xml:"result,omitempty"`
 }
 
@@ -1877,8 +1833,6 @@ type ResetPassword struct {
 }
 
 type ResetPasswordResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com resetPasswordResponse"`
-
 	Result *ResetPasswordResult `xml:"result,omitempty"`
 }
 
@@ -1887,8 +1841,6 @@ type GetUserInfo struct {
 }
 
 type GetUserInfoResponse struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com getUserInfoResponse"`
-
 	Result *GetUserInfoResult `xml:"result,omitempty"`
 }
 
@@ -2055,8 +2007,6 @@ type Location struct {
 }
 
 type QueryResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com QueryResult"`
-
 	Done bool `xml:"done,omitempty"`
 
 	QueryLocator *QueryLocator `xml:"queryLocator,omitempty"`
@@ -2067,8 +2017,6 @@ type QueryResult struct {
 }
 
 type SearchResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com SearchResult"`
-
 	QueryId string `xml:"queryId,omitempty"`
 
 	SearchRecords []*SearchRecord `xml:"searchRecords,omitempty"`
@@ -2339,8 +2287,6 @@ type RenderEmailTemplateError struct {
 }
 
 type UpsertResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com UpsertResult"`
-
 	Created bool `xml:"created,omitempty"`
 
 	Errors []*Error `xml:"errors,omitempty"`
@@ -2351,8 +2297,6 @@ type UpsertResult struct {
 }
 
 type PerformQuickActionResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com PerformQuickActionResult"`
-
 	ContextId *ID `xml:"contextId,omitempty"`
 
 	Created bool `xml:"created,omitempty"`
@@ -2547,8 +2491,6 @@ type ProcessResult struct {
 }
 
 type DeleteResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DeleteResult"`
-
 	Errors []*Error `xml:"errors,omitempty"`
 
 	Id *ID `xml:"id,omitempty"`
@@ -2557,8 +2499,6 @@ type DeleteResult struct {
 }
 
 type UndeleteResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com UndeleteResult"`
-
 	Errors []*Error `xml:"errors,omitempty"`
 
 	Id *ID `xml:"id,omitempty"`
@@ -2567,8 +2507,6 @@ type UndeleteResult struct {
 }
 
 type EmptyRecycleBinResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com EmptyRecycleBinResult"`
-
 	Errors []*Error `xml:"errors,omitempty"`
 
 	Id *ID `xml:"id,omitempty"`
@@ -2577,8 +2515,6 @@ type EmptyRecycleBinResult struct {
 }
 
 type LeadConvert struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com LeadConvert"`
-
 	AccountId *ID `xml:"accountId,omitempty"`
 
 	ContactId *ID `xml:"contactId,omitempty"`
@@ -2599,8 +2535,6 @@ type LeadConvert struct {
 }
 
 type LeadConvertResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com LeadConvertResult"`
-
 	AccountId *ID `xml:"accountId,omitempty"`
 
 	ContactId *ID `xml:"contactId,omitempty"`
@@ -2615,8 +2549,6 @@ type LeadConvertResult struct {
 }
 
 type DescribeSObjectResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeSObjectResult"`
-
 	ActionOverrides []*ActionOverride `xml:"actionOverrides,omitempty"`
 
 	Activateable bool `xml:"activateable,omitempty"`
@@ -2689,8 +2621,6 @@ type DescribeSObjectResult struct {
 }
 
 type DescribeGlobalSObjectResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeGlobalSObjectResult"`
-
 	Activateable bool `xml:"activateable,omitempty"`
 
 	Createable bool `xml:"createable,omitempty"`
@@ -2759,8 +2689,6 @@ type ChildRelationship struct {
 }
 
 type DescribeGlobalResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeGlobalResult"`
-
 	Encoding string `xml:"encoding,omitempty"`
 
 	MaxBatchSize int32 `xml:"maxBatchSize,omitempty"`
