@@ -53,4 +53,4 @@ Just send pull request if needed or fill an issue!
 
 ## License
 
-The MIT License See [LICENSE](https://github.com/tzmfreedom/yasd/blob/master/LICENSE) file.
+The MIT License See [LICENSE](https://github.com/tzmfreedom/go-soapforce/blob/master/LICENSE) file.
