@@ -65,7 +65,7 @@ func (c *Client) Login(u string, p string) (*LoginResult, error) {
 	sessionHeader := &SessionHeader{
 		SessionId: res.Result.SessionId,
 	}
-	c.soapClient.SetHeader(&sessionHeader)
+	c.soapClient.AddHeader(&sessionHeader)
 	return res.Result, nil
 }
 
@@ -92,7 +92,7 @@ func (c *Client) DescribeSObject(s string) (*DescribeSObjectResult, error) {
 	return res.Result, nil
 }
 
-func (c *Client) DescribeGlobal(s string) (*DescribeGlobalResult, error) {
+func (c *Client) DescribeGlobal() (*DescribeGlobalResult, error) {
 	res, err := c.soapClient.DescribeGlobal(&DescribeGlobal{})
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func (c *Client) DescribeGlobal(s string) (*DescribeGlobalResult, error) {
 	return res.Result, nil
 }
 
-func (c *Client) DescribeLayout(s string, l string, ids []*ID) (*DescribeLayoutResult, error) {
+func (c *Client) DescribeLayout(s string, l string, ids []string) (*DescribeLayoutResultResult, error) {
 	req := &DescribeLayout{
 		SObjectType:   s,
 		LayoutName:    l,
@@ -158,7 +158,7 @@ func (c *Client) Merge(mergeReq []*MergeRequest) ([]*MergeResult, error) {
 	return res.Result, nil
 }
 
-func (c *Client) Delete(ids []*ID) ([]*DeleteResult, error) {
+func (c *Client) Delete(ids []string) ([]*DeleteResult, error) {
 	req := &Delete{
 		Ids: ids,
 	}
@@ -169,7 +169,7 @@ func (c *Client) Delete(ids []*ID) ([]*DeleteResult, error) {
 	return res.Result, nil
 }
 
-func (c *Client) Undelete(ids []*ID) ([]*UndeleteResult, error) {
+func (c *Client) Undelete(ids []string) ([]*UndeleteResult, error) {
 	req := &Undelete{
 		Ids: ids,
 	}
@@ -180,7 +180,7 @@ func (c *Client) Undelete(ids []*ID) ([]*UndeleteResult, error) {
 	return res.Result, nil
 }
 
-func (c *Client) Retrieve(s string, ids []*ID, fieldList string) ([]*SObject, error) {
+func (c *Client) Retrieve(s string, ids []string, fieldList string) ([]*SObject, error) {
 	req := &Retrieve{
 		SObjectType: s,
 		Ids:         ids,
@@ -191,6 +191,13 @@ func (c *Client) Retrieve(s string, ids []*ID, fieldList string) ([]*SObject, er
 		return nil, err
 	}
 	return res.Result, nil
+}
+
+func (c *Client) SetBatchSize(size int) {
+	queryOptions := &QueryOptions{
+		BatchSize: int32(size),
+	}
+	c.soapClient.AddHeader(&queryOptions)
 }
 
 func (c *Client) Query(q string) (*QueryResult, error) {
@@ -215,7 +222,7 @@ func (c *Client) QueryAll(q string) (*QueryResult, error) {
 	return res.Result, nil
 }
 
-func (c *Client) QueryMore(ql *QueryLocator) (*QueryResult, error) {
+func (c *Client) QueryMore(ql string) (*QueryResult, error) {
 	req := &QueryMore{
 		QueryLocator: ql,
 	}
@@ -237,7 +244,7 @@ func (c *Client) Search(s string) (*SearchResult, error) {
 	return res.Result, nil
 }
 
-func (c *Client) SetPassword(uid *ID, password string) (*SetPasswordResult, error) {
+func (c *Client) SetPassword(uid string, password string) (*SetPasswordResult, error) {
 	req := &SetPassword{
 		UserId:   uid,
 		Password: password,
@@ -249,7 +256,7 @@ func (c *Client) SetPassword(uid *ID, password string) (*SetPasswordResult, erro
 	return res.Result, nil
 }
 
-func (c *Client) ResetPassword(uid *ID) (*ResetPasswordResult, error) {
+func (c *Client) ResetPassword(uid string) (*ResetPasswordResult, error) {
 	req := &ResetPassword{
 		UserId: uid,
 	}
@@ -260,7 +267,7 @@ func (c *Client) ResetPassword(uid *ID) (*ResetPasswordResult, error) {
 	return res.Result, nil
 }
 
-func (c *Client) GetUserInfo(s string) (*GetUserInfoResult, error) {
+func (c *Client) GetUserInfo() (*GetUserInfoResult, error) {
 	res, err := c.soapClient.GetUserInfo(&GetUserInfo{})
 	if err != nil {
 		return nil, err
@@ -268,7 +275,7 @@ func (c *Client) GetUserInfo(s string) (*GetUserInfoResult, error) {
 	return res.Result, nil
 }
 
-func (c *Client) SendEmailMessage(ids *ID) (*SendEmailResult, error) {
+func (c *Client) SendEmailMessage(ids string) (*SendEmailResult, error) {
 	req := &SendEmailMessage{
 		Ids: ids,
 	}

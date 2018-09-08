@@ -16,6 +16,61 @@ func main() {
 		panic(err)
 	}
 	pp.Print(res)
+	retrieve()
+}
+
+func retrieve() {
+	ids := []string{ "001A000001WTqy6" }
+	res, err := client.Retrieve("Account", ids, "Name, BillingAddress")
+	if err != nil {
+		panic(err)
+	}
+	pp.Print(res)
+}
+
+func describe() {
+	res, err := client.DescribeGlobal()
+	// res, err := client.DescribeSObject("Account")
+	if err != nil {
+		panic(err)
+	}
+	pp.Print(res)
+}
+
+func describeLayout() {
+	res, err := client.DescribeLayout("Account", "", []string{})
+	if err != nil {
+		panic(err)
+	}
+	pp.Print(res)
+}
+
+
+func getUserInfo() {
+	res, err := client.GetUserInfo()
+	if err != nil {
+		panic(err)
+	}
+	pp.Print(res)
+}
+
+func query() string {
+	client.SetBatchSize(200)
+	res, err := client.Query("SELECT id, Name FROM Account")
+	if err != nil {
+		panic(err)
+	}
+	pp.Print(res)
+	return res.QueryLocator
+}
+
+func queryMore(ql string) string {
+	res, err := client.QueryMore(ql)
+	if err != nil {
+		panic(err)
+	}
+	pp.Print(res)
+	return res.QueryLocator
 }
 
 func create() {
@@ -35,10 +90,9 @@ func create() {
 }
 
 func update() {
-	var id soapforce.ID = "001A000001WTqy6"
 	sobjects := []*soapforce.SObject{
 		{
-			Id:   &id,
+			Id:   "001A000001WTqy6",
 			Type: "Account",
 			Fields: map[string]string{
 				"Name": "popoipi!!",
@@ -53,10 +107,9 @@ func update() {
 }
 
 func upsert() {
-	var id soapforce.ID = "001A000001WTqy6"
 	sobjects := []*soapforce.SObject{
 		{
-			Id:   &id,
+			Id:   "001A000001WTqy6",
 			Type: "Account",
 			Fields: map[string]string{
 				"Name": "heihei!!",
@@ -71,9 +124,8 @@ func upsert() {
 }
 
 func delete() {
-	var id soapforce.ID = "001A000001WTqy6"
-	ids := []*soapforce.ID{
-		&id,
+	ids := []string{
+		"001A000001WSZK4",
 	}
 	sResult, err := client.Delete(ids)
 	if err != nil {
@@ -84,9 +136,8 @@ func delete() {
 }
 
 func undelete() {
-	var id soapforce.ID = "001A000001WTqy6"
-	ids := []*soapforce.ID{
-		&id,
+	ids := []string{
+		"001A000001WTqy6",
 	}
 	sResult, err := client.Undelete(ids)
 	if err != nil {

@@ -18,13 +18,11 @@ var _ time.Time
 var _ xml.Name
 
 type SObject struct {
-	XMLName xml.Name `xml:"urn:sobject.partner.soap.sforce.com sObject"`
-
 	Type string `xml:"type,omitempty"`
 
 	FieldsToNull []string `xml:"fieldsToNull,omitempty"`
 
-	Id *ID `xml:"Id,omitempty"`
+	Id string `xml:"Id,omitempty"`
 
 	Fields map[string]string
 }
@@ -34,7 +32,7 @@ func (s *SObject) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	start.Name.Space = "urn:sobject.partner.soap.sforce.com"
 	e.EncodeToken(start)
 	e.EncodeElement(s.Type, xml.StartElement{Name: xml.Name{Local: "type"}})
-	if s.Id != nil {
+	if s.Id != "" {
 		e.EncodeElement(s.Id, xml.StartElement{Name: xml.Name{Local: "Id"}})
 	}
 	if s.FieldsToNull != nil {
@@ -46,9 +44,33 @@ func (s *SObject) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return nil
 }
 
-type ID string
+func (s *SObject) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	s.Fields = make(map[string]string)
 
-type QueryLocator string
+	for {
+		token, err := d.Token()
+		if token == nil {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if t, ok := token.(xml.StartElement); ok {
+			var v string
+			if err := d.DecodeElement(&v, &t); err != nil {
+				return err
+			}
+			if t.Name.Local == "Id" {
+				s.Id = v
+			} else if t.Name.Local == "type" {
+				s.Type = v
+			} else {
+				s.Fields[t.Name.Local] = v
+			}
+		}
+	}
+	return nil
+}
 
 type StatusCode string
 
@@ -1311,7 +1333,7 @@ type DescribeAppMenu struct {
 
 	AppMenuType *AppMenuType `xml:"appMenuType,omitempty"`
 
-	NetworkId *ID `xml:"networkId,omitempty"`
+	NetworkId string `xml:"networkId,omitempty"`
 }
 
 type DescribeAppMenuResponse struct {
@@ -1327,13 +1349,13 @@ type DescribeLayout struct {
 
 	LayoutName string `xml:"layoutName,omitempty"`
 
-	RecordTypeIds []*ID `xml:"recordTypeIds,omitempty"`
+	RecordTypeIds []string `xml:"recordTypeIds,omitempty"`
 }
 
 type DescribeLayoutResponse struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com describeLayoutResponse"`
 
-	Result *DescribeLayoutResult `xml:"result,omitempty"`
+	Result *DescribeLayoutResultResult `xml:"result,omitempty"`
 }
 
 type DescribeCompactLayouts struct {
@@ -1341,7 +1363,7 @@ type DescribeCompactLayouts struct {
 
 	SObjectType string `xml:"sObjectType,omitempty"`
 
-	RecordTypeIds []*ID `xml:"recordTypeIds,omitempty"`
+	RecordTypeIds []string `xml:"recordTypeIds,omitempty"`
 }
 
 type DescribeCompactLayoutsResponse struct {
@@ -1369,7 +1391,7 @@ type DescribePathAssistants struct {
 
 	PicklistValue string `xml:"picklistValue,omitempty"`
 
-	RecordTypeIds []*ID `xml:"recordTypeIds,omitempty"`
+	RecordTypeIds []string `xml:"recordTypeIds,omitempty"`
 }
 
 type DescribePathAssistantsResponse struct {
@@ -1549,7 +1571,7 @@ type RenderEmailTemplateResponse struct {
 type SendEmailMessage struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com sendEmailMessage"`
 
-	Ids *ID `xml:"ids,omitempty"`
+	Ids string `xml:"ids,omitempty"`
 }
 
 type SendEmailMessageResponse struct {
@@ -1591,7 +1613,7 @@ type MergeResponse struct {
 type Delete struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com delete"`
 
-	Ids []*ID `xml:"ids,omitempty"`
+	Ids []string `xml:"ids,omitempty"`
 }
 
 type DeleteResponse struct {
@@ -1601,7 +1623,7 @@ type DeleteResponse struct {
 type Undelete struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com undelete"`
 
-	Ids []*ID `xml:"ids,omitempty"`
+	Ids []string `xml:"ids,omitempty"`
 }
 
 type UndeleteResponse struct {
@@ -1611,7 +1633,7 @@ type UndeleteResponse struct {
 type EmptyRecycleBin struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com emptyRecycleBin"`
 
-	Ids []*ID `xml:"ids,omitempty"`
+	Ids []string `xml:"ids,omitempty"`
 }
 
 type EmptyRecycleBinResponse struct {
@@ -1645,7 +1667,7 @@ type RetrieveQuickActionTemplates struct {
 
 	QuickActionNames []string `xml:"quickActionNames,omitempty"`
 
-	ContextId *ID `xml:"contextId,omitempty"`
+	ContextId string `xml:"contextId,omitempty"`
 }
 
 type RetrieveQuickActionTemplatesResponse struct {
@@ -1699,7 +1721,7 @@ type Retrieve struct {
 
 	SObjectType string `xml:"sObjectType,omitempty"`
 
-	Ids []*ID `xml:"ids,omitempty"`
+	Ids []string `xml:"ids,omitempty"`
 }
 
 type RetrieveResponse struct {
@@ -1791,7 +1813,7 @@ type QueryAllResponse struct {
 type QueryMore struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com queryMore"`
 
-	QueryLocator *QueryLocator `xml:"queryLocator,omitempty"`
+	QueryLocator string `xml:"queryLocator,omitempty"`
 }
 
 type QueryMoreResponse struct {
@@ -1819,7 +1841,7 @@ type GetServerTimestampResponse struct {
 type SetPassword struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com setPassword"`
 
-	UserId *ID `xml:"userId,omitempty"`
+	UserId string `xml:"userId,omitempty"`
 
 	Password string `xml:"password,omitempty"`
 }
@@ -1831,7 +1853,7 @@ type SetPasswordResponse struct {
 type ResetPassword struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com resetPassword"`
 
-	UserId *ID `xml:"userId,omitempty"`
+	UserId string `xml:"userId,omitempty"`
 }
 
 type ResetPasswordResponse struct {
@@ -1855,9 +1877,9 @@ type SessionHeader struct {
 type LoginScopeHeader struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com LoginScopeHeader"`
 
-	OrganizationId *ID `xml:"organizationId,omitempty"`
+	OrganizationId string `xml:"organizationId,omitempty"`
 
-	PortalId *ID `xml:"portalId,omitempty"`
+	PortalId string `xml:"portalId,omitempty"`
 }
 
 type CallOptions struct {
@@ -1953,7 +1975,7 @@ type EmailHeader struct {
 type AssignmentRuleHeader struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com AssignmentRuleHeader"`
 
-	AssignmentRuleId *ID `xml:"assignmentRuleId,omitempty"`
+	AssignmentRuleId string `xml:"assignmentRuleId,omitempty"`
 
 	UseDefaultRule bool `xml:"useDefaultRule,omitempty"`
 }
@@ -1961,7 +1983,7 @@ type AssignmentRuleHeader struct {
 type UserTerritoryDeleteHeader struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com UserTerritoryDeleteHeader"`
 
-	TransferToUserId *ID `xml:"transferToUserId,omitempty"`
+	TransferToUserId string `xml:"transferToUserId,omitempty"`
 }
 
 type LocaleOptions struct {
@@ -2011,7 +2033,7 @@ type Location struct {
 type QueryResult struct {
 	Done bool `xml:"done,omitempty"`
 
-	QueryLocator *QueryLocator `xml:"queryLocator,omitempty"`
+	QueryLocator string `xml:"queryLocator,omitempty"`
 
 	Records []*SObject `xml:"records,omitempty"`
 
@@ -2127,7 +2149,7 @@ type NameObjectValuePair struct {
 type GetUpdatedResult struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com GetUpdatedResult"`
 
-	Ids []*ID `xml:"ids,omitempty"`
+	Ids []string `xml:"ids,omitempty"`
 
 	LatestDateCovered time.Time `xml:"latestDateCovered,omitempty"`
 }
@@ -2147,7 +2169,7 @@ type DeletedRecord struct {
 
 	DeletedDate time.Time `xml:"deletedDate,omitempty"`
 
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 }
 
 type GetServerTimestampResult struct {
@@ -2189,15 +2211,15 @@ type GetUserInfoResult struct {
 
 	OrgHasPersonAccounts bool `xml:"orgHasPersonAccounts,omitempty"`
 
-	OrganizationId *ID `xml:"organizationId,omitempty"`
+	OrganizationId string `xml:"organizationId,omitempty"`
 
 	OrganizationMultiCurrency bool `xml:"organizationMultiCurrency,omitempty"`
 
 	OrganizationName string `xml:"organizationName,omitempty"`
 
-	ProfileId *ID `xml:"profileId,omitempty"`
+	ProfileId string `xml:"profileId,omitempty"`
 
-	RoleId *ID `xml:"roleId,omitempty"`
+	RoleId string `xml:"roleId,omitempty"`
 
 	SessionSecondsValid int32 `xml:"sessionSecondsValid,omitempty"`
 
@@ -2207,7 +2229,7 @@ type GetUserInfoResult struct {
 
 	UserFullName string `xml:"userFullName,omitempty"`
 
-	UserId *ID `xml:"userId,omitempty"`
+	UserId string `xml:"userId,omitempty"`
 
 	UserLanguage string `xml:"userLanguage,omitempty"`
 
@@ -2233,7 +2255,7 @@ type LoginResult struct {
 
 	SessionId string `xml:"sessionId,omitempty"`
 
-	UserId *ID `xml:"userId,omitempty"`
+	UserId string `xml:"userId,omitempty"`
 
 	UserInfo *GetUserInfoResult `xml:"userInfo,omitempty"`
 }
@@ -2265,13 +2287,13 @@ type SendEmailError struct {
 
 	StatusCode *StatusCode `xml:"statusCode,omitempty"`
 
-	TargetObjectId *ID `xml:"targetObjectId,omitempty"`
+	TargetObjectId string `xml:"targetObjectId,omitempty"`
 }
 
 type SaveResult struct {
 	Errors []*Error `xml:"errors,omitempty"`
 
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 
 	Success bool `xml:"success,omitempty"`
 }
@@ -2293,21 +2315,21 @@ type UpsertResult struct {
 
 	Errors []*Error `xml:"errors,omitempty"`
 
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 
 	Success bool `xml:"success,omitempty"`
 }
 
 type PerformQuickActionResult struct {
-	ContextId *ID `xml:"contextId,omitempty"`
+	ContextId string `xml:"contextId,omitempty"`
 
 	Created bool `xml:"created,omitempty"`
 
 	Errors []*Error `xml:"errors,omitempty"`
 
-	FeedItemIds []*ID `xml:"feedItemIds,omitempty"`
+	FeedItemIds []string `xml:"feedItemIds,omitempty"`
 
-	Ids []*ID `xml:"ids,omitempty"`
+	Ids []string `xml:"ids,omitempty"`
 
 	Success bool `xml:"success,omitempty"`
 
@@ -2331,7 +2353,7 @@ type MergeRequest struct {
 
 	MasterRecord *SObject `xml:"masterRecord,omitempty"`
 
-	RecordToMergeIds []*ID `xml:"recordToMergeIds,omitempty"`
+	RecordToMergeIds []string `xml:"recordToMergeIds,omitempty"`
 }
 
 type MergeResult struct {
@@ -2339,13 +2361,13 @@ type MergeResult struct {
 
 	Errors []*Error `xml:"errors,omitempty"`
 
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 
-	MergedRecordIds []*ID `xml:"mergedRecordIds,omitempty"`
+	MergedRecordIds []string `xml:"mergedRecordIds,omitempty"`
 
 	Success bool `xml:"success,omitempty"`
 
-	UpdatedRelatedIds []*ID `xml:"updatedRelatedIds,omitempty"`
+	UpdatedRelatedIds []string `xml:"updatedRelatedIds,omitempty"`
 }
 
 type ProcessRequest struct {
@@ -2353,7 +2375,7 @@ type ProcessRequest struct {
 
 	Comments string `xml:"comments,omitempty"`
 
-	NextApproverIds []*ID `xml:"nextApproverIds,omitempty"`
+	NextApproverIds []string `xml:"nextApproverIds,omitempty"`
 }
 
 type ProcessSubmitRequest struct {
@@ -2361,9 +2383,9 @@ type ProcessSubmitRequest struct {
 
 	*ProcessRequest
 
-	ObjectId *ID `xml:"objectId,omitempty"`
+	ObjectId string `xml:"objectId,omitempty"`
 
-	SubmitterId *ID `xml:"submitterId,omitempty"`
+	SubmitterId string `xml:"submitterId,omitempty"`
 
 	ProcessDefinitionNameOrId string `xml:"processDefinitionNameOrId,omitempty"`
 
@@ -2377,13 +2399,13 @@ type ProcessWorkitemRequest struct {
 
 	Action string `xml:"action,omitempty"`
 
-	WorkitemId *ID `xml:"workitemId,omitempty"`
+	WorkitemId string `xml:"workitemId,omitempty"`
 }
 
 type PerformQuickActionRequest struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com PerformQuickActionRequest"`
 
-	ContextId *ID `xml:"contextId,omitempty"`
+	ContextId string `xml:"contextId,omitempty"`
 
 	QuickActionName string `xml:"quickActionName,omitempty"`
 
@@ -2409,7 +2431,7 @@ type DescribeQuickActionResult struct {
 
 	ActionEnumOrId string `xml:"actionEnumOrId,omitempty"`
 
-	CanvasApplicationId *ID `xml:"canvasApplicationId,omitempty"`
+	CanvasApplicationId string `xml:"canvasApplicationId,omitempty"`
 
 	CanvasApplicationName string `xml:"canvasApplicationName,omitempty"`
 
@@ -2431,7 +2453,7 @@ type DescribeQuickActionResult struct {
 
 	Layout *DescribeLayoutSection `xml:"layout,omitempty"`
 
-	LightningComponentBundleId *ID `xml:"lightningComponentBundleId,omitempty"`
+	LightningComponentBundleId string `xml:"lightningComponentBundleId,omitempty"`
 
 	LightningComponentBundleName string `xml:"lightningComponentBundleName,omitempty"`
 
@@ -2447,7 +2469,7 @@ type DescribeQuickActionResult struct {
 
 	TargetParentField string `xml:"targetParentField,omitempty"`
 
-	TargetRecordTypeId *ID `xml:"targetRecordTypeId,omitempty"`
+	TargetRecordTypeId string `xml:"targetRecordTypeId,omitempty"`
 
 	TargetSobjectType string `xml:"targetSobjectType,omitempty"`
 
@@ -2477,17 +2499,17 @@ type DescribeVisualForceResult struct {
 type ProcessResult struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com ProcessResult"`
 
-	ActorIds []*ID `xml:"actorIds,omitempty"`
+	ActorIds []string `xml:"actorIds,omitempty"`
 
-	EntityId *ID `xml:"entityId,omitempty"`
+	EntityId string `xml:"entityId,omitempty"`
 
 	Errors []*Error `xml:"errors,omitempty"`
 
-	InstanceId *ID `xml:"instanceId,omitempty"`
+	InstanceId string `xml:"instanceId,omitempty"`
 
 	InstanceStatus string `xml:"instanceStatus,omitempty"`
 
-	NewWorkitemIds []*ID `xml:"newWorkitemIds,omitempty"`
+	NewWorkitemIds []string `xml:"newWorkitemIds,omitempty"`
 
 	Success bool `xml:"success,omitempty"`
 }
@@ -2495,7 +2517,7 @@ type ProcessResult struct {
 type DeleteResult struct {
 	Errors []*Error `xml:"errors,omitempty"`
 
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 
 	Success bool `xml:"success,omitempty"`
 }
@@ -2503,7 +2525,7 @@ type DeleteResult struct {
 type UndeleteResult struct {
 	Errors []*Error `xml:"errors,omitempty"`
 
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 
 	Success bool `xml:"success,omitempty"`
 }
@@ -2511,41 +2533,41 @@ type UndeleteResult struct {
 type EmptyRecycleBinResult struct {
 	Errors []*Error `xml:"errors,omitempty"`
 
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 
 	Success bool `xml:"success,omitempty"`
 }
 
 type LeadConvert struct {
-	AccountId *ID `xml:"accountId,omitempty"`
+	AccountId string `xml:"accountId,omitempty"`
 
-	ContactId *ID `xml:"contactId,omitempty"`
+	ContactId string `xml:"contactId,omitempty"`
 
 	ConvertedStatus string `xml:"convertedStatus,omitempty"`
 
 	DoNotCreateOpportunity bool `xml:"doNotCreateOpportunity,omitempty"`
 
-	LeadId *ID `xml:"leadId,omitempty"`
+	LeadId string `xml:"leadId,omitempty"`
 
 	OpportunityName string `xml:"opportunityName,omitempty"`
 
 	OverwriteLeadSource bool `xml:"overwriteLeadSource,omitempty"`
 
-	OwnerId *ID `xml:"ownerId,omitempty"`
+	OwnerId string `xml:"ownerId,omitempty"`
 
 	SendNotificationEmail bool `xml:"sendNotificationEmail,omitempty"`
 }
 
 type LeadConvertResult struct {
-	AccountId *ID `xml:"accountId,omitempty"`
+	AccountId string `xml:"accountId,omitempty"`
 
-	ContactId *ID `xml:"contactId,omitempty"`
+	ContactId string `xml:"contactId,omitempty"`
 
 	Errors []*Error `xml:"errors,omitempty"`
 
-	LeadId *ID `xml:"leadId,omitempty"`
+	LeadId string `xml:"leadId,omitempty"`
 
-	OpportunityId *ID `xml:"opportunityId,omitempty"`
+	OpportunityId string `xml:"opportunityId,omitempty"`
 
 	Success bool `xml:"success,omitempty"`
 }
@@ -2671,8 +2693,6 @@ type DescribeGlobalSObjectResult struct {
 }
 
 type ChildRelationship struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com ChildRelationship"`
-
 	CascadeDelete bool `xml:"cascadeDelete,omitempty"`
 
 	ChildSObject string `xml:"childSObject,omitempty"`
@@ -2699,24 +2719,18 @@ type DescribeGlobalResult struct {
 }
 
 type DescribeGlobalThemeResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeGlobalTheme"`
-
 	Global *DescribeGlobalResult `xml:"global,omitempty"`
 
 	Theme *DescribeThemeResult `xml:"theme,omitempty"`
 }
 
 type ScopeInfo struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com ScopeInfo"`
-
 	Label string `xml:"label,omitempty"`
 
 	Name string `xml:"name,omitempty"`
 }
 
 type FilteredLookupInfo struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com FilteredLookupInfo"`
-
 	ControllingFields []string `xml:"controllingFields,omitempty"`
 
 	Dependent bool `xml:"dependent,omitempty"`
@@ -2725,8 +2739,6 @@ type FilteredLookupInfo struct {
 }
 
 type Field struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com Field"`
-
 	Aggregatable bool `xml:"aggregatable,omitempty"`
 
 	AutoNumber bool `xml:"autoNumber,omitempty"`
@@ -2835,8 +2847,6 @@ type Field struct {
 }
 
 type PicklistEntry struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com PicklistEntry"`
-
 	Active bool `xml:"active,omitempty"`
 
 	DefaultValue bool `xml:"defaultValue,omitempty"`
@@ -3023,7 +3033,7 @@ type FindDuplicatesResult struct {
 type DescribeFlexiPageResult struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeFlexiPageResult"`
 
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 
 	Label string `xml:"label,omitempty"`
 
@@ -3123,7 +3133,7 @@ type DescribeSoftphoneLayoutResult struct {
 
 	CallTypes []*DescribeSoftphoneLayoutCallType `xml:"callTypes,omitempty"`
 
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 
 	Name string `xml:"name,omitempty"`
 }
@@ -3177,7 +3187,7 @@ type DescribeCompactLayoutsResult struct {
 
 	CompactLayouts []*DescribeCompactLayout `xml:"compactLayouts,omitempty"`
 
-	DefaultCompactLayoutId *ID `xml:"defaultCompactLayoutId,omitempty"`
+	DefaultCompactLayoutId string `xml:"defaultCompactLayoutId,omitempty"`
 
 	RecordTypeCompactLayoutMappings []*RecordTypeCompactLayoutMapping `xml:"recordTypeCompactLayoutMappings,omitempty"`
 }
@@ -3189,7 +3199,7 @@ type DescribeCompactLayout struct {
 
 	FieldItems []*DescribeLayoutItem `xml:"fieldItems,omitempty"`
 
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 
 	ImageItems []*DescribeLayoutItem `xml:"imageItems,omitempty"`
 
@@ -3205,11 +3215,11 @@ type RecordTypeCompactLayoutMapping struct {
 
 	Available bool `xml:"available,omitempty"`
 
-	CompactLayoutId *ID `xml:"compactLayoutId,omitempty"`
+	CompactLayoutId string `xml:"compactLayoutId,omitempty"`
 
 	CompactLayoutName string `xml:"compactLayoutName,omitempty"`
 
-	RecordTypeId *ID `xml:"recordTypeId,omitempty"`
+	RecordTypeId string `xml:"recordTypeId,omitempty"`
 
 	RecordTypeName string `xml:"recordTypeName,omitempty"`
 }
@@ -3233,7 +3243,7 @@ type DescribePathAssistant struct {
 
 	PicklistsForRecordType []*PicklistForRecordType `xml:"picklistsForRecordType,omitempty"`
 
-	RecordTypeId *ID `xml:"recordTypeId,omitempty"`
+	RecordTypeId string `xml:"recordTypeId,omitempty"`
 
 	Steps []*DescribePathAssistantStep `xml:"steps,omitempty"`
 }
@@ -3271,15 +3281,11 @@ type DescribePathAssistantField struct {
 }
 
 type DescribeApprovalLayoutResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeApprovalLayoutResult"`
-
 	ApprovalLayouts []*DescribeApprovalLayout `xml:"approvalLayouts,omitempty"`
 }
 
 type DescribeApprovalLayout struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeApprovalLayout"`
-
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 
 	Label string `xml:"label,omitempty"`
 
@@ -3289,9 +3295,7 @@ type DescribeApprovalLayout struct {
 }
 
 type DescribeLayoutResultResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeLayoutResult"`
-
-	Layouts []*DescribeLayout `xml:"layouts,omitempty"`
+	Layouts []*DescribeLayoutResult `xml:"layouts,omitempty"`
 
 	RecordTypeMappings []*RecordTypeMapping `xml:"recordTypeMappings,omitempty"`
 
@@ -3299,8 +3303,6 @@ type DescribeLayoutResultResult struct {
 }
 
 type DescribeLayoutResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeLayout"`
-
 	ButtonLayoutSection *DescribeLayoutButtonSection `xml:"buttonLayoutSection,omitempty"`
 
 	DetailLayoutSections []*DescribeLayoutSection `xml:"detailLayoutSections,omitempty"`
@@ -3311,7 +3313,7 @@ type DescribeLayoutResult struct {
 
 	HighlightsPanelLayoutSection *DescribeLayoutSection `xml:"highlightsPanelLayoutSection,omitempty"`
 
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 
 	QuickActionList *DescribeQuickActionListResult `xml:"quickActionList,omitempty"`
 
@@ -3321,14 +3323,10 @@ type DescribeLayoutResult struct {
 }
 
 type DescribeQuickActionListResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeQuickActionListResult"`
-
 	QuickActionListItems []*DescribeQuickActionListItemResult `xml:"quickActionListItems,omitempty"`
 }
 
 type DescribeQuickActionListItemResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeQuickActionListItemResult"`
-
 	AccessLevelRequired *ShareAccessLevel `xml:"accessLevelRequired,omitempty"`
 
 	Colors []*DescribeColor `xml:"colors,omitempty"`
@@ -3349,14 +3347,10 @@ type DescribeQuickActionListItemResult struct {
 }
 
 type DescribeLayoutFeedView struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeLayoutFeedView"`
-
 	FeedFilters []*DescribeLayoutFeedFilter `xml:"feedFilters,omitempty"`
 }
 
 type DescribeLayoutFeedFilter struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeLayoutFeedFilter"`
-
 	Label string `xml:"label,omitempty"`
 
 	Name string `xml:"name,omitempty"`
@@ -3365,8 +3359,6 @@ type DescribeLayoutFeedFilter struct {
 }
 
 type DescribeLayoutSection struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeLayoutSection"`
-
 	Collapsed bool `xml:"collapsed,omitempty"`
 
 	Columns int32 `xml:"columns,omitempty"`
@@ -3375,9 +3367,9 @@ type DescribeLayoutSection struct {
 
 	LayoutRows []*DescribeLayoutRow `xml:"layoutRows,omitempty"`
 
-	LayoutSectionId *ID `xml:"layoutSectionId,omitempty"`
+	LayoutSectionId string `xml:"layoutSectionId,omitempty"`
 
-	ParentLayoutId *ID `xml:"parentLayoutId,omitempty"`
+	ParentLayoutId string `xml:"parentLayoutId,omitempty"`
 
 	Rows int32 `xml:"rows,omitempty"`
 
@@ -3389,22 +3381,16 @@ type DescribeLayoutSection struct {
 }
 
 type DescribeLayoutButtonSection struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeLayoutButtonSection"`
-
 	DetailButtons []*DescribeLayoutButton `xml:"detailButtons,omitempty"`
 }
 
 type DescribeLayoutRow struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeLayoutRow"`
-
 	LayoutItems []*DescribeLayoutItem `xml:"layoutItems,omitempty"`
 
 	NumItems int32 `xml:"numItems,omitempty"`
 }
 
 type DescribeLayoutItem struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeLayoutItem"`
-
 	EditableForNew bool `xml:"editableForNew,omitempty"`
 
 	EditableForUpdate bool `xml:"editableForUpdate,omitempty"`
@@ -3419,8 +3405,6 @@ type DescribeLayoutItem struct {
 }
 
 type DescribeLayoutButton struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeLayoutButton"`
-
 	Behavior *WebLinkWindowType `xml:"behavior,omitempty"`
 
 	Colors []*DescribeColor `xml:"colors,omitempty"`
@@ -3463,8 +3447,6 @@ type DescribeLayoutButton struct {
 }
 
 type DescribeLayoutComponent struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeLayoutComponent"`
-
 	DisplayLines int32 `xml:"displayLines,omitempty"`
 
 	TabOrder int32 `xml:"tabOrder,omitempty"`
@@ -3475,16 +3457,12 @@ type DescribeLayoutComponent struct {
 }
 
 type FieldComponent struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com FieldComponent"`
-
 	*DescribeLayoutComponent
 
 	Field *Field `xml:"field,omitempty"`
 }
 
 type FieldLayoutComponent struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com FieldLayoutComponent"`
-
 	*DescribeLayoutComponent
 
 	Components []*DescribeLayoutComponent `xml:"components,omitempty"`
@@ -3493,8 +3471,6 @@ type FieldLayoutComponent struct {
 }
 
 type VisualforcePage struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com VisualforcePage"`
-
 	*DescribeLayoutComponent
 
 	ShowLabel bool `xml:"showLabel,omitempty"`
@@ -3509,8 +3485,6 @@ type VisualforcePage struct {
 }
 
 type Canvas struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com Canvas"`
-
 	*DescribeLayoutComponent
 
 	DisplayLocation string `xml:"displayLocation,omitempty"`
@@ -3527,8 +3501,6 @@ type Canvas struct {
 }
 
 type ReportChartComponent struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com ReportChartComponent"`
-
 	*DescribeLayoutComponent
 
 	CacheData bool `xml:"cacheData,omitempty"`
@@ -3547,8 +3519,6 @@ type ReportChartComponent struct {
 }
 
 type AnalyticsCloudComponent struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com AnalyticsCloudComponent"`
-
 	*DescribeLayoutComponent
 
 	Error string `xml:"error,omitempty"`
@@ -3567,22 +3537,16 @@ type AnalyticsCloudComponent struct {
 }
 
 type CustomLinkComponent struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com CustomLinkComponent"`
-
 	*DescribeLayoutComponent
 
 	CustomLink *DescribeLayoutButton `xml:"customLink,omitempty"`
 }
 
 type NamedLayoutInfo struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com NamedLayoutInfo"`
-
 	Name string `xml:"name,omitempty"`
 }
 
 type RecordTypeInfo struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com RecordTypeInfo"`
-
 	Available bool `xml:"available,omitempty"`
 
 	DefaultRecordTypeMapping bool `xml:"defaultRecordTypeMapping,omitempty"`
@@ -3591,17 +3555,15 @@ type RecordTypeInfo struct {
 
 	Name string `xml:"name,omitempty"`
 
-	RecordTypeId *ID `xml:"recordTypeId,omitempty"`
+	RecordTypeId string `xml:"recordTypeId,omitempty"`
 }
 
 type RecordTypeMapping struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com RecordTypeMapping"`
-
 	Available bool `xml:"available,omitempty"`
 
 	DefaultRecordTypeMapping bool `xml:"defaultRecordTypeMapping,omitempty"`
 
-	LayoutId *ID `xml:"layoutId,omitempty"`
+	LayoutId string `xml:"layoutId,omitempty"`
 
 	Master bool `xml:"master,omitempty"`
 
@@ -3609,32 +3571,24 @@ type RecordTypeMapping struct {
 
 	PicklistsForRecordType []*PicklistForRecordType `xml:"picklistsForRecordType,omitempty"`
 
-	RecordTypeId *ID `xml:"recordTypeId,omitempty"`
+	RecordTypeId string `xml:"recordTypeId,omitempty"`
 }
 
 type PicklistForRecordType struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com PicklistForRecordType"`
-
 	PicklistName string `xml:"picklistName,omitempty"`
 
 	PicklistValues []*PicklistEntry `xml:"picklistValues,omitempty"`
 }
 
 type RelatedContent struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com RelatedContent"`
-
 	RelatedContentItems []*DescribeRelatedContentItem `xml:"relatedContentItems,omitempty"`
 }
 
 type DescribeRelatedContentItem struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeRelatedContentItem"`
-
 	DescribeLayoutItem *DescribeLayoutItem `xml:"describeLayoutItem,omitempty"`
 }
 
 type RelatedList struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com RelatedList"`
-
 	AccessLevelRequiredForCreate *ShareAccessLevel `xml:"accessLevelRequiredForCreate,omitempty"`
 
 	Buttons []*DescribeLayoutButton `xml:"buttons,omitempty"`
@@ -3657,8 +3611,6 @@ type RelatedList struct {
 }
 
 type RelatedListColumn struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com RelatedListColumn"`
-
 	Field string `xml:"field,omitempty"`
 
 	FieldApiName string `xml:"fieldApiName,omitempty"`
@@ -3673,16 +3625,12 @@ type RelatedListColumn struct {
 }
 
 type RelatedListSort struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com RelatedListSort"`
-
 	Ascending bool `xml:"ascending,omitempty"`
 
 	Column string `xml:"column,omitempty"`
 }
 
 type EmailFileAttachment struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com EmailFileAttachment"`
-
 	Body []byte `xml:"body,omitempty"`
 
 	ContentType string `xml:"contentType,omitempty"`
@@ -3693,8 +3641,6 @@ type EmailFileAttachment struct {
 }
 
 type Email struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com Email"`
-
 	BccSender bool `xml:"bccSender,omitempty"`
 
 	EmailPriority *EmailPriority `xml:"emailPriority,omitempty"`
@@ -3711,22 +3657,18 @@ type Email struct {
 }
 
 type MassEmailMessage struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com MassEmailMessage"`
-
 	*Email
 
 	Description string `xml:"description,omitempty"`
 
-	TargetObjectIds *ID `xml:"targetObjectIds,omitempty"`
+	TargetObjectIds string `xml:"targetObjectIds,omitempty"`
 
-	TemplateId *ID `xml:"templateId,omitempty"`
+	TemplateId string `xml:"templateId,omitempty"`
 
-	WhatIds *ID `xml:"whatIds,omitempty"`
+	WhatIds string `xml:"whatIds,omitempty"`
 }
 
 type SingleEmailMessage struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com SingleEmailMessage"`
-
 	*Email
 
 	BccAddresses string `xml:"bccAddresses,omitempty"`
@@ -3735,9 +3677,9 @@ type SingleEmailMessage struct {
 
 	Charset string `xml:"charset,omitempty"`
 
-	DocumentAttachments []*ID `xml:"documentAttachments,omitempty"`
+	DocumentAttachments []string `xml:"documentAttachments,omitempty"`
 
-	EntityAttachments []*ID `xml:"entityAttachments,omitempty"`
+	EntityAttachments []string `xml:"entityAttachments,omitempty"`
 
 	FileAttachments []*EmailFileAttachment `xml:"fileAttachments,omitempty"`
 
@@ -3747,15 +3689,15 @@ type SingleEmailMessage struct {
 
 	OptOutPolicy *SendEmailOptOutPolicy `xml:"optOutPolicy,omitempty"`
 
-	OrgWideEmailAddressId *ID `xml:"orgWideEmailAddressId,omitempty"`
+	OrgWideEmailAddressId string `xml:"orgWideEmailAddressId,omitempty"`
 
 	PlainTextBody string `xml:"plainTextBody,omitempty"`
 
 	References string `xml:"references,omitempty"`
 
-	TargetObjectId *ID `xml:"targetObjectId,omitempty"`
+	TargetObjectId string `xml:"targetObjectId,omitempty"`
 
-	TemplateId *ID `xml:"templateId,omitempty"`
+	TemplateId string `xml:"templateId,omitempty"`
 
 	ToAddresses string `xml:"toAddresses,omitempty"`
 
@@ -3763,20 +3705,16 @@ type SingleEmailMessage struct {
 
 	TreatTargetObjectAsRecipient bool `xml:"treatTargetObjectAsRecipient,omitempty"`
 
-	WhatId *ID `xml:"whatId,omitempty"`
+	WhatId string `xml:"whatId,omitempty"`
 }
 
 type SendEmailResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com SendEmailResult"`
-
 	Errors []*SendEmailError `xml:"errors,omitempty"`
 
 	Success bool `xml:"success,omitempty"`
 }
 
 type ListViewColumn struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com ListViewColumn"`
-
 	AscendingLabel string `xml:"ascendingLabel,omitempty"`
 
 	DescendingLabel string `xml:"descendingLabel,omitempty"`
@@ -3799,8 +3737,6 @@ type ListViewColumn struct {
 }
 
 type ListViewOrderBy struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com ListViewOrderBy"`
-
 	FieldNameOrPath string `xml:"fieldNameOrPath,omitempty"`
 
 	NullsPosition *OrderByNullsPosition `xml:"nullsPosition,omitempty"`
@@ -3809,11 +3745,9 @@ type ListViewOrderBy struct {
 }
 
 type DescribeSoqlListView struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeSoqlListView"`
-
 	Columns []*ListViewColumn `xml:"columns,omitempty"`
 
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 
 	OrderBy []*ListViewOrderBy `xml:"orderBy,omitempty"`
 
@@ -3827,28 +3761,20 @@ type DescribeSoqlListView struct {
 }
 
 type DescribeSoqlListViewsRequest struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeSoqlListViewsRequest"`
-
 	ListViewParams []*DescribeSoqlListViewParams `xml:"listViewParams,omitempty"`
 }
 
 type DescribeSoqlListViewParams struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeSoqlListViewParams"`
-
 	DeveloperNameOrId string `xml:"developerNameOrId,omitempty"`
 
 	SobjectType string `xml:"sobjectType,omitempty"`
 }
 
 type DescribeSoqlListViewResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeSoqlListViewResult"`
-
 	DescribeSoqlListViews []*DescribeSoqlListView `xml:"describeSoqlListViews,omitempty"`
 }
 
 type ExecuteListViewRequest struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com ExecuteListViewRequest"`
-
 	DeveloperNameOrId string `xml:"developerNameOrId,omitempty"`
 
 	Limit int32 `xml:"limit,omitempty"`
@@ -3861,15 +3787,13 @@ type ExecuteListViewRequest struct {
 }
 
 type ExecuteListViewResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com ExecuteListViewResult"`
-
 	Columns []*ListViewColumn `xml:"columns,omitempty"`
 
 	DeveloperName string `xml:"developerName,omitempty"`
 
 	Done bool `xml:"done,omitempty"`
 
-	Id *ID `xml:"id,omitempty"`
+	Id string `xml:"id,omitempty"`
 
 	Label string `xml:"label,omitempty"`
 
@@ -3879,14 +3803,10 @@ type ExecuteListViewResult struct {
 }
 
 type ListViewRecord struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com ListViewRecord"`
-
 	Columns []*ListViewRecordColumn `xml:"columns,omitempty"`
 }
 
 type ListViewRecordColumn struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com ListViewRecordColumn"`
-
 	FieldNameOrPath string `xml:"fieldNameOrPath,omitempty"`
 
 	Value string `xml:"value,omitempty"`
@@ -3897,8 +3817,6 @@ type SoqlWhereCondition struct {
 }
 
 type SoqlCondition struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com SoqlCondition"`
-
 	*SoqlWhereCondition
 
 	Field string `xml:"field,omitempty"`
@@ -3909,16 +3827,12 @@ type SoqlCondition struct {
 }
 
 type SoqlNotCondition struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com SoqlNotCondition"`
-
 	*SoqlWhereCondition
 
 	Condition *SoqlWhereCondition `xml:"condition,omitempty"`
 }
 
 type SoqlConditionGroup struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com SoqlConditionGroup"`
-
 	*SoqlWhereCondition
 
 	Conditions []*SoqlWhereCondition `xml:"conditions,omitempty"`
@@ -3927,8 +3841,6 @@ type SoqlConditionGroup struct {
 }
 
 type SoqlSubQueryCondition struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com SoqlSubQueryCondition"`
-
 	*SoqlWhereCondition
 
 	Field string `xml:"field,omitempty"`
@@ -3939,8 +3851,6 @@ type SoqlSubQueryCondition struct {
 }
 
 type DescribeSearchLayoutResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeSearchLayoutResult"`
-
 	ErrorMsg string `xml:"errorMsg,omitempty"`
 
 	Label string `xml:"label,omitempty"`
@@ -3953,8 +3863,6 @@ type DescribeSearchLayoutResult struct {
 }
 
 type DescribeColumn struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeColumn"`
-
 	Field string `xml:"field,omitempty"`
 
 	Format string `xml:"format,omitempty"`
@@ -3965,16 +3873,12 @@ type DescribeColumn struct {
 }
 
 type DescribeSearchScopeOrderResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeSearchScopeOrderResult"`
-
 	KeyPrefix string `xml:"keyPrefix,omitempty"`
 
 	Name string `xml:"name,omitempty"`
 }
 
 type DescribeSearchableEntityResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeSearchableEntityResult"`
-
 	Label string `xml:"label,omitempty"`
 
 	Name string `xml:"name,omitempty"`
@@ -3983,8 +3887,6 @@ type DescribeSearchableEntityResult struct {
 }
 
 type DescribeTabSetResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeTabSetResult"`
-
 	Description string `xml:"description,omitempty"`
 
 	Label string `xml:"label,omitempty"`
@@ -4001,8 +3903,6 @@ type DescribeTabSetResult struct {
 }
 
 type DescribeTab struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeTab"`
-
 	Colors []*DescribeColor `xml:"colors,omitempty"`
 
 	Custom bool `xml:"custom,omitempty"`
@@ -4023,8 +3923,6 @@ type DescribeTab struct {
 }
 
 type DescribeColor struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeColor"`
-
 	Color string `xml:"color,omitempty"`
 
 	Context string `xml:"context,omitempty"`
@@ -4033,8 +3931,6 @@ type DescribeColor struct {
 }
 
 type DescribeIcon struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com DescribeIcon"`
-
 	ContentType string `xml:"contentType,omitempty"`
 
 	Height int32 `xml:"height,omitempty"`
@@ -4047,32 +3943,26 @@ type DescribeIcon struct {
 }
 
 type ActionOverride struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com ActionOverride"`
-
 	FormFactor string `xml:"formFactor,omitempty"`
 
 	IsAvailableInTouch bool `xml:"isAvailableInTouch,omitempty"`
 
 	Name string `xml:"name,omitempty"`
 
-	PageId *ID `xml:"pageId,omitempty"`
+	PageId string `xml:"pageId,omitempty"`
 
 	Url string `xml:"url,omitempty"`
 }
 
 type RenderEmailTemplateRequest struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com RenderEmailTemplateRequest"`
-
 	TemplateBodies string `xml:"templateBodies,omitempty"`
 
-	WhatId *ID `xml:"whatId,omitempty"`
+	WhatId string `xml:"whatId,omitempty"`
 
-	WhoId *ID `xml:"whoId,omitempty"`
+	WhoId string `xml:"whoId,omitempty"`
 }
 
 type RenderEmailTemplateBodyResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com RenderEmailTemplateBodyResult"`
-
 	Errors []*RenderEmailTemplateError `xml:"errors,omitempty"`
 
 	MergedBody string `xml:"mergedBody,omitempty"`
@@ -4081,8 +3971,6 @@ type RenderEmailTemplateBodyResult struct {
 }
 
 type RenderEmailTemplateResult struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com RenderEmailTemplateResult"`
-
 	BodyResults *RenderEmailTemplateBodyResult `xml:"bodyResults,omitempty"`
 
 	Errors []*Error `xml:"errors,omitempty"`
@@ -4091,16 +3979,12 @@ type RenderEmailTemplateResult struct {
 }
 
 type LogInfo struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com LogInfo"`
-
 	Category *LogCategory `xml:"category,omitempty"`
 
 	Level *LogCategoryLevel `xml:"level,omitempty"`
 }
 
 type PackageVersion struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com PackageVersion"`
-
 	MajorNumber int32 `xml:"majorNumber,omitempty"`
 
 	MinorNumber int32 `xml:"minorNumber,omitempty"`
@@ -4109,8 +3993,6 @@ type PackageVersion struct {
 }
 
 type LimitInfo struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com LimitInfo"`
-
 	Current int32 `xml:"current,omitempty"`
 
 	Limit int32 `xml:"limit,omitempty"`
@@ -4119,8 +4001,6 @@ type LimitInfo struct {
 }
 
 type OwnerChangeOption struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com OwnerChangeOption"`
-
 	Type_ *OwnerChangeOptionType `xml:"type,omitempty"`
 
 	Execute bool `xml:"execute,omitempty"`
