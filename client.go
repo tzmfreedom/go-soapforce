@@ -1,6 +1,9 @@
 package soapforce
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
 const (
 	DefaultApiVersion = "38.0"
@@ -37,6 +40,14 @@ func (c *Client) SetLoginUrl(url string) {
 func (c *Client) setLoginUrl() {
 	url := fmt.Sprintf("https://%s/services/Soap/u/%s", c.loginUrl, c.apiVersion)
 	c.soapClient.SetServerUrl(url)
+}
+
+func (c *Client) SetDebug(debug bool) {
+	c.soapClient.SetDebug(debug)
+}
+
+func (c *Client) SetLogger(logger io.Writer) {
+	c.soapClient.SetLogger(logger)
 }
 
 func (c *Client) Login(u string, p string) (*LoginResult, error) {

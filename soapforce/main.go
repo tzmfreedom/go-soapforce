@@ -10,12 +10,12 @@ import (
 var client = soapforce.NewClient()
 
 func main() {
+	client.SetDebug(true)
 	res, err := client.Login(os.Getenv("SALESFORCE_USERNAME"), os.Getenv("SALESFORCE_PASSWORD"))
 	if err != nil {
 		panic(err)
 	}
 	pp.Print(res)
-	undelete()
 }
 
 func create() {
@@ -95,4 +95,3 @@ func undelete() {
 	pp.Print(sResult)
 
 }
-

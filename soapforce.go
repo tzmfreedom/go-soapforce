@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/xml"
+	"io"
 	"io/ioutil"
 	"math/rand"
 	"net"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -4881,6 +4883,14 @@ func (service *Soap) ClearHeader() {
 	service.client.ClearHeader()
 }
 
+func (service *Soap) SetDebug(debug bool) {
+	service.client.SetDebug(debug)
+}
+
+func (service *Soap) SetLogger(logger io.Writer) {
+	service.client.SetLogger(logger)
+}
+
 // Error can be either of the following types:
 //
 //   - LoginFault
@@ -5782,6 +5792,8 @@ type SOAPClient struct {
 	tlsCfg  *tls.Config
 	auth    *BasicAuth
 	headers []interface{}
+	logger  io.Writer
+	debug   bool
 }
 
 // **********
@@ -5889,7 +5901,17 @@ func NewSOAPClientWithTLSConfig(url string, tlsCfg *tls.Config, auth *BasicAuth)
 		url:    url,
 		tlsCfg: tlsCfg,
 		auth:   auth,
+		logger: os.Stdout,
+		debug:  false,
 	}
+}
+
+func (s *SOAPClient) SetDebug(debug bool) {
+	s.debug = debug
+}
+
+func (s *SOAPClient) SetLogger(logger io.Writer) {
+	s.logger = logger
 }
 
 func (s *SOAPClient) AddHeader(header interface{}) {
@@ -5921,6 +5943,11 @@ func (s *SOAPClient) Call(request, response interface{}) error {
 
 	if err := encoder.Flush(); err != nil {
 		return err
+	}
+
+	if s.debug {
+		s.logger.Write(buffer.Bytes())
+		s.logger.Write([]byte("\n"))
 	}
 
 	req, err := http.NewRequest("POST", s.url, buffer)
@@ -5955,6 +5982,11 @@ func (s *SOAPClient) Call(request, response interface{}) error {
 	}
 	if len(rawbody) == 0 {
 		return nil
+	}
+
+	if s.debug {
+		s.logger.Write(rawbody)
+		s.logger.Write([]byte("\n"))
 	}
 
 	respEnvelope := new(SOAPEnvelope)
