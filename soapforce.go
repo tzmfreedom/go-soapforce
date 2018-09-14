@@ -2267,8 +2267,6 @@ type ExtendedErrorDetails struct {
 }
 
 type Error struct {
-	XMLName xml.Name `xml:"urn:partner.soap.sforce.com Error"`
-
 	ExtendedErrorDetails []*ExtendedErrorDetails `xml:"extendedErrorDetails,omitempty"`
 
 	Fields []string `xml:"fields,omitempty"`
