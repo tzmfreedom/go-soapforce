@@ -36,6 +36,9 @@ func (s *SObject) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		e.EncodeElement(s.Id, xml.StartElement{Name: xml.Name{Local: "Id"}})
 	}
 	if s.FieldsToNull != nil {
+		for _, v := range s.FieldsToNull {
+			e.EncodeElement(v, xml.StartElement{Name: xml.Name{Local: "fieldsToNull"}})
+		}
 	}
 	for k, v := range s.Fields {
 		e.EncodeElement(v, xml.StartElement{Name: xml.Name{Local: k}})
