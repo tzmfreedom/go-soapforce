@@ -24,7 +24,7 @@ type SObject struct {
 
 	Id string `xml:"Id,omitempty"`
 
-	Fields map[string]string
+	Fields map[string]interface{}
 }
 
 func (s *SObject) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
@@ -41,14 +41,23 @@ func (s *SObject) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 		}
 	}
 	for k, v := range s.Fields {
-		e.EncodeElement(v, xml.StartElement{Name: xml.Name{Local: k}})
+		if _, ok := v.(string); ok {
+			e.EncodeElement(v, xml.StartElement{Name: xml.Name{Local: k}})
+		} else if obj, ok := v.(map[string]string); ok {
+			ref := xml.StartElement{Name: xml.Name{Local: k}}
+			e.EncodeToken(ref)
+			for innerKey, innerValue := range obj {
+				e.EncodeElement(innerValue, xml.StartElement{Name: xml.Name{Local: innerKey}})
+			}
+			e.EncodeToken(ref.End())
+		}
 	}
 	e.EncodeToken(start.End())
 	return nil
 }
 
 func (s *SObject) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	s.Fields = make(map[string]string)
+	s.Fields = make(map[string]interface{})
 
 	for {
 		token, err := d.Token()

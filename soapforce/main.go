@@ -20,7 +20,7 @@ func main() {
 }
 
 func retrieve() {
-	ids := []string{ "001A000001WTqy6" }
+	ids := []string{"001A000001WTqy6"}
 	res, err := client.Retrieve("Account", ids, "Name, BillingAddress")
 	if err != nil {
 		panic(err)
@@ -44,7 +44,6 @@ func describeLayout() {
 	}
 	pp.Print(res)
 }
-
 
 func getUserInfo() {
 	res, err := client.GetUserInfo()
