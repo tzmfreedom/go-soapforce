@@ -16,7 +16,7 @@ func main() {
 		panic(err)
 	}
 	pp.Print(res)
-	retrieve()
+	create()
 }
 
 func retrieve() {
@@ -75,9 +75,13 @@ func queryMore(ql string) string {
 func create() {
 	sobjects := []*soapforce.SObject{
 		{
-			Type: "Account",
-			Fields: map[string]string{
-				"Name": "Hoge",
+			Type: "Contact",
+			Fields: map[string]interface{}{
+				"LastName": "Hoge",
+				"Account": map[string]string{
+					"type":     "Account",
+					"ExKey__c": "PPAP",
+				},
 			},
 		},
 	}
@@ -93,7 +97,7 @@ func update() {
 		{
 			Id:   "001A000001WTqy6",
 			Type: "Account",
-			Fields: map[string]string{
+			Fields: map[string]interface{}{
 				"Name": "popoipi!!",
 			},
 		},
@@ -110,7 +114,7 @@ func upsert() {
 		{
 			Id:   "001A000001WTqy6",
 			Type: "Account",
-			Fields: map[string]string{
+			Fields: map[string]interface{}{
 				"Name": "heihei!!",
 			},
 		},
