@@ -11,6 +11,7 @@ const (
 )
 
 type Client struct {
+	UserInfo   *GetUserInfoResult
 	apiVersion string
 	soapClient *Soap
 	sessionId  string
@@ -62,6 +63,7 @@ func (c *Client) Login(u string, p string) (*LoginResult, error) {
 	c.sessionId = res.Result.SessionId
 	c.serverUrl = res.Result.ServerUrl
 	c.soapClient.SetServerUrl(res.Result.ServerUrl)
+	c.UserInfo = res.Result.UserInfo
 	sessionHeader := &SessionHeader{
 		SessionId: res.Result.SessionId,
 	}
