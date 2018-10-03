@@ -57,8 +57,11 @@ func (s *SObject) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 }
 
 func (s *SObject) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
-	s.Fields = make(map[string]interface{})
+	return decodeSObject(d, s, "")
+}
 
+func decodeSObject(d *xml.Decoder, s *SObject, objectName string) error {
+	s.Fields = make(map[string]interface{})
 	for {
 		token, err := d.Token()
 		if token == nil {
@@ -67,17 +70,40 @@ func (s *SObject) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 		if err != nil {
 			return err
 		}
-		if t, ok := token.(xml.StartElement); ok {
-			var v string
-			if err := d.DecodeElement(&v, &t); err != nil {
-				return err
+		if t, ok := token.(xml.EndElement); ok {
+			if t.Name.Local == objectName {
+				break
 			}
-			if t.Name.Local == "Id" {
-				s.Id = v
-			} else if t.Name.Local == "type" {
-				s.Type = v
+		}
+		if t, ok := token.(xml.StartElement); ok {
+			if t.Name.Local == "Id" || t.Name.Local == "type" {
+				var v string
+				if err := d.DecodeElement(&v, &t); err != nil {
+					return err
+				}
+				if t.Name.Local == "Id" {
+					s.Id = v
+				} else if t.Name.Local == "type" {
+					s.Type = v
+				}
 			} else {
-				s.Fields[t.Name.Local] = v
+				if len(t.Attr) > 0 {
+					a := t.Attr[0]
+					if a.Name.Local == "type" && a.Value == "sf:sObject" {
+						v := &SObject{}
+						err := decodeSObject(d, v, t.Name.Local)
+						if err != nil {
+							return err
+						}
+						s.Fields[t.Name.Local] = v
+					}
+				} else {
+					var v string
+					if err := d.DecodeElement(&v, &t); err != nil {
+						return err
+					}
+					s.Fields[t.Name.Local] = v
+				}
 			}
 		}
 	}

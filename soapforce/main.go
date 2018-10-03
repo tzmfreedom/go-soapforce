@@ -16,7 +16,7 @@ func main() {
 		panic(err)
 	}
 	pp.Print(res)
-	create()
+	query()
 }
 
 func retrieve() {
@@ -55,7 +55,7 @@ func getUserInfo() {
 
 func query() string {
 	client.SetBatchSize(200)
-	res, err := client.Query("SELECT id, Name FROM Account")
+	res, err := client.Query("SELECT id, Account.Name, Name, Account.ExKey__c FROM Contact LIMIT 2")
 	if err != nil {
 		panic(err)
 	}
