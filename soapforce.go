@@ -2,6 +2,7 @@ package soapforce
 
 import (
 	"bytes"
+	"compress/gzip"
 	"crypto/tls"
 	"encoding/xml"
 	"io"
@@ -4807,6 +4808,10 @@ func (service *Soap) SetLogger(logger io.Writer) {
 	service.client.SetLogger(logger)
 }
 
+func (service *Soap) SetGzip(gz bool) {
+	service.client.SetGzip(gz)
+}
+
 // Error can be either of the following types:
 //
 //   - LoginFault
@@ -5710,6 +5715,7 @@ type SOAPClient struct {
 	headers []interface{}
 	logger  io.Writer
 	debug   bool
+	gzip    bool
 }
 
 // **********
@@ -5819,6 +5825,7 @@ func NewSOAPClientWithTLSConfig(url string, tlsCfg *tls.Config, auth *BasicAuth)
 		auth:   auth,
 		logger: os.Stdout,
 		debug:  false,
+		gzip:   true,
 	}
 }
 
@@ -5828,6 +5835,10 @@ func (s *SOAPClient) SetDebug(debug bool) {
 
 func (s *SOAPClient) SetLogger(logger io.Writer) {
 	s.logger = logger
+}
+
+func (s *SOAPClient) SetGzip(gz bool) {
+	s.gzip = gz
 }
 
 func (s *SOAPClient) AddHeader(header interface{}) {
@@ -5866,19 +5877,10 @@ func (s *SOAPClient) Call(request, response interface{}) error {
 		s.logger.Write([]byte("\n"))
 	}
 
-	req, err := http.NewRequest("POST", s.url, buffer)
+	req, err := s.createRequest(buffer)
 	if err != nil {
 		return err
 	}
-	if s.auth != nil {
-		req.SetBasicAuth(s.auth.Login, s.auth.Password)
-	}
-
-	req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
-	req.Header.Add("SOAPAction", "''")
-
-	req.Header.Set("User-Agent", "gowsdl/0.1")
-	req.Close = true
 
 	tr := &http.Transport{
 		TLSClientConfig: s.tlsCfg,
@@ -5892,12 +5894,9 @@ func (s *SOAPClient) Call(request, response interface{}) error {
 	}
 	defer res.Body.Close()
 
-	rawbody, err := ioutil.ReadAll(res.Body)
+	rawbody, err := getRawBody(res)
 	if err != nil {
 		return err
-	}
-	if len(rawbody) == 0 {
-		return nil
 	}
 
 	if s.debug {
@@ -5922,4 +5921,60 @@ func (s *SOAPClient) Call(request, response interface{}) error {
 
 func (s *SOAPClient) SetServerUrl(url string) {
 	s.url = url
+}
+
+func (s *SOAPClient) createRequest(buffer *bytes.Buffer) (*http.Request, error) {
+	var req *http.Request
+	var err error
+	if s.gzip {
+		gzipBuffer := new(bytes.Buffer)
+		gw := gzip.NewWriter(gzipBuffer)
+		_, err = gw.Write(buffer.Bytes())
+		if err != nil {
+			return nil, err
+		}
+		err := gw.Close()
+		if err != nil {
+			return nil, err
+		}
+		req, err = http.NewRequest("POST", s.url, gzipBuffer)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Add("Content-Encoding", "gzip")
+		req.Header.Add("Accept-Encoding", "gzip")
+	} else {
+		req, err = http.NewRequest("POST", s.url, buffer)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if s.auth != nil {
+		req.SetBasicAuth(s.auth.Login, s.auth.Password)
+	}
+
+	req.Header.Add("Content-Type", "text/xml; charset=\"utf-8\"")
+	req.Header.Add("SOAPAction", "''")
+
+	req.Header.Set("User-Agent", "gowsdl/0.1")
+	req.Close = true
+	return req, nil
+}
+
+
+func getRawBody(res *http.Response) ([]byte, error) {
+	if res.Header.Get("Content-Encoding") == "gzip" {
+		buf := new(bytes.Buffer)
+		gr, err := gzip.NewReader(res.Body)
+		if err != nil {
+			return nil, err
+		}
+		_, err = buf.ReadFrom(gr)
+		if err != nil {
+			return nil, err
+		}
+		return buf.Bytes(), nil
+	}
+	return ioutil.ReadAll(res.Body)
 }

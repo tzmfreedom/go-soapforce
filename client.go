@@ -51,6 +51,10 @@ func (c *Client) SetLogger(logger io.Writer) {
 	c.soapClient.SetLogger(logger)
 }
 
+func (c *Client) SetGzip(gz bool) {
+	c.soapClient.SetGzip(gz)
+}
+
 func (c *Client) Login(u string, p string) (*LoginResult, error) {
 	req := &Login{
 		Username: u,

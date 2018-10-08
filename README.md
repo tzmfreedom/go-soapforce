@@ -24,7 +24,7 @@ client.SetLoginUrl("test.salesforce.com")
 
 set api version
 ```golang
-client.SetApiVersion("38.0")
+client.SetApiVersion("44.0")
 ```
 
 debug request/response
