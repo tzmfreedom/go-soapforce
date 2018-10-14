@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	DefaultApiVersion = "38.0"
+	DefaultApiVersion = "44.0"
 	DefaultLoginUrl   = "login.salesforce.com"
 )
 
