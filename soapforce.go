@@ -5962,7 +5962,6 @@ func (s *SOAPClient) createRequest(buffer *bytes.Buffer) (*http.Request, error) 
 	return req, nil
 }
 
-
 func getRawBody(res *http.Response) ([]byte, error) {
 	if res.Header.Get("Content-Encoding") == "gzip" {
 		buf := new(bytes.Buffer)

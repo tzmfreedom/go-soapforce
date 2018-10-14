@@ -12,34 +12,34 @@ const (
 
 type Client struct {
 	UserInfo   *GetUserInfoResult
-	apiVersion string
+	ApiVersion string
+	ServerUrl  string
+	LoginUrl   string
 	soapClient *Soap
 	sessionId  string
-	serverUrl  string
-	loginUrl   string
 }
 
 func NewClient() *Client {
 	soap := NewSoap("", true, nil)
 	return &Client{
 		soapClient: soap,
-		apiVersion: DefaultApiVersion,
-		loginUrl:   DefaultLoginUrl,
+		ApiVersion: DefaultApiVersion,
+		LoginUrl:   DefaultLoginUrl,
 	}
 }
 
 func (c *Client) SetApiVersion(v string) {
-	c.apiVersion = v
+	c.ApiVersion = v
 	c.setLoginUrl()
 }
 
 func (c *Client) SetLoginUrl(url string) {
-	c.loginUrl = url
+	c.LoginUrl = url
 	c.setLoginUrl()
 }
 
 func (c *Client) setLoginUrl() {
-	url := fmt.Sprintf("https://%s/services/Soap/u/%s", c.loginUrl, c.apiVersion)
+	url := fmt.Sprintf("https://%s/services/Soap/u/%s", c.LoginUrl, c.ApiVersion)
 	c.soapClient.SetServerUrl(url)
 }
 
@@ -65,7 +65,7 @@ func (c *Client) Login(u string, p string) (*LoginResult, error) {
 		return nil, err
 	}
 	c.sessionId = res.Result.SessionId
-	c.serverUrl = res.Result.ServerUrl
+	c.ServerUrl = res.Result.ServerUrl
 	c.soapClient.SetServerUrl(res.Result.ServerUrl)
 	c.UserInfo = res.Result.UserInfo
 	sessionHeader := &SessionHeader{
@@ -81,7 +81,7 @@ func (c *Client) Logout() error {
 		return err
 	}
 	c.sessionId = ""
-	c.serverUrl = ""
+	c.ServerUrl = ""
 	c.setLoginUrl()
 	c.soapClient.ClearHeader()
 	return nil
