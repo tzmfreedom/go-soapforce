@@ -292,6 +292,69 @@ func (c *Client) SendEmailMessage(ids string) (*SendEmailResult, error) {
 	return res.Result, nil
 }
 
+func (c *Client) CompileAndTest(r *CompileAndTestRequest) (*CompileAndTestResult, error) {
+	req := &CompileAndTest{
+		CompileAndTestRequest: r,
+	}
+	res, err := c.soapClient.CompileAndTest(req)
+	if err != nil {
+		return nil, err
+	}
+	return res.Result, nil
+}
+
+func (c *Client) CompileClasses(scripts []string) ([]*CompileClassResult, error) {
+	req := &CompileClasses{
+		Scripts: scripts,
+	}
+	res, err := c.soapClient.CompileClasses(req)
+	if err != nil {
+		return nil, err
+	}
+	return res.Result, nil
+}
+
+func (c *Client) CompileTriggers(scripts []string) ([]*CompileTriggerResult, error) {
+	req := &CompileTriggers{
+		Scripts: scripts,
+	}
+	res, err := c.soapClient.CompileTriggers(req)
+	if err != nil {
+		return nil, err
+	}
+	return res.Result, nil
+}
+
+func (c *Client) ExecuteAnonymous(code string) (*ExecuteAnonymousResult, error) {
+	req := &ExecuteAnonymous{
+		String: code,
+	}
+	res, err := c.soapClient.ExecuteAnonymous(req)
+	if err != nil {
+		return nil, err
+	}
+	return res.Result, nil
+}
+
+func (c *Client) RunTests(r *RunTestsRequest) (*RunTestsResult, error) {
+	req := &RunTests{
+		RunTestsRequest: r,
+	}
+	res, err := c.soapClient.RunTests(req)
+	if err != nil {
+		return nil, err
+	}
+	return res.Result, nil
+}
+
+func (c *Client) WsdlToApex(req *WsdlToApex) (*WsdlToApexResult, error) {
+	res, err := c.soapClient.WsdlToApex(req)
+	if err != nil {
+		return nil, err
+	}
+	return res.Result, nil
+}
+
 func (c *Client) SendEmail(m *Email) (*SendEmailResult, error) {
 	req := &SendEmail{
 		Messages: m,
