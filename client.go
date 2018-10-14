@@ -206,6 +206,13 @@ func (c *Client) SetBatchSize(size int) {
 	c.soapClient.AddHeader(&queryOptions)
 }
 
+func (c *Client) SetDebuggingHeader(categories []*LogInfo) {
+	debuggingHeaders := &DebuggingHeader{
+		Categories: categories,
+	}
+	c.soapClient.AddHeader(&debuggingHeaders)
+}
+
 func (c *Client) Query(q string) (*QueryResult, error) {
 	req := &Query{
 		QueryString: q,

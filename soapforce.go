@@ -1165,62 +1165,56 @@ const (
 	ListViewIsSoqlCompatibleALL ListViewIsSoqlCompatible = "ALL"
 )
 
-type DebugLevel string
-
 const (
-	DebugLevelNone DebugLevel = "None"
+	DebugLevelNone string = "None"
 
-	DebugLevelDebugOnly DebugLevel = "DebugOnly"
+	DebugLevelDebugOnly string = "DebugOnly"
 
-	DebugLevelDb DebugLevel = "Db"
+	DebugLevelDb string = "Db"
 
-	DebugLevelProfiling DebugLevel = "Profiling"
+	DebugLevelProfiling string = "Profiling"
 
-	DebugLevelCallout DebugLevel = "Callout"
+	DebugLevelCallout string = "Callout"
 
-	DebugLevelDetail DebugLevel = "Detail"
+	DebugLevelDetail string = "Detail"
 )
 
-type LogCategory string
-
 const (
-	LogCategoryDb LogCategory = "Db"
+	LogCategoryDb string = "Db"
 
-	LogCategoryWorkflow LogCategory = "Workflow"
+	LogCategoryWorkflow string = "Workflow"
 
-	LogCategoryValidation LogCategory = "Validation"
+	LogCategoryValidation string = "Validation"
 
-	LogCategoryCallout LogCategory = "Callout"
+	LogCategoryCallout string = "Callout"
 
-	LogCategoryApex_code LogCategory = "Apex_code"
+	LogCategoryApex_code string = "Apex_code"
 
-	LogCategoryApex_profiling LogCategory = "Apex_profiling"
+	LogCategoryApex_profiling string = "Apex_profiling"
 
-	LogCategoryVisualforce LogCategory = "Visualforce"
+	LogCategoryVisualforce string = "Visualforce"
 
-	LogCategorySystem LogCategory = "System"
+	LogCategorySystem string = "System"
 
-	LogCategoryAll LogCategory = "All"
+	LogCategoryAll string = "All"
 )
 
-type LogCategoryLevel string
-
 const (
-	LogCategoryLevelNone LogCategoryLevel = "None"
+	LogCategoryLevelNone string = "None"
 
-	LogCategoryLevelFinest LogCategoryLevel = "Finest"
+	LogCategoryLevelFinest string = "Finest"
 
-	LogCategoryLevelFiner LogCategoryLevel = "Finer"
+	LogCategoryLevelFiner string = "Finer"
 
-	LogCategoryLevelFine LogCategoryLevel = "Fine"
+	LogCategoryLevelFine string = "Fine"
 
-	LogCategoryLevelDebug LogCategoryLevel = "Debug"
+	LogCategoryLevelDebug string = "Debug"
 
-	LogCategoryLevelInfo LogCategoryLevel = "Info"
+	LogCategoryLevelInfo string = "Info"
 
-	LogCategoryLevelWarn LogCategoryLevel = "Warn"
+	LogCategoryLevelWarn string = "Warn"
 
-	LogCategoryLevelError LogCategoryLevel = "Error"
+	LogCategoryLevelError string = "Error"
 )
 
 type OwnerChangeOptionType string
@@ -1940,7 +1934,7 @@ type DebuggingHeader struct {
 
 	Categories []*LogInfo `xml:"categories,omitempty"`
 
-	DebugLevel *DebugLevel `xml:"debugLevel,omitempty"`
+	DebugLevel string `xml:"debugLevel,omitempty"`
 }
 
 type DebuggingInfo struct {
@@ -4016,9 +4010,9 @@ type RenderEmailTemplateResult struct {
 }
 
 type LogInfo struct {
-	Category *LogCategory `xml:"category,omitempty"`
+	Category string `xml:"category,omitempty"`
 
-	Level *LogCategoryLevel `xml:"level,omitempty"`
+	Level string `xml:"level,omitempty"`
 }
 
 type PackageVersion struct {
