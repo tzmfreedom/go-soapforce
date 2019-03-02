@@ -33,6 +33,14 @@ func (c *Client) SetApiVersion(v string) {
 	c.setLoginUrl()
 }
 
+func (c *Client) SetAccessToken(sid string) {
+	c.sessionId = sid
+	sessionHeader := &SessionHeader{
+		SessionId: sid,
+	}
+	c.soapClient.AddHeader(&sessionHeader)
+}
+
 func (c *Client) SetLoginUrl(url string) {
 	c.LoginUrl = url
 	c.setLoginUrl()
