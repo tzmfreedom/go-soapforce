@@ -97,6 +97,12 @@ func decodeSObject(d *xml.Decoder, s *SObject, objectName string) error {
 							return err
 						}
 						s.Fields[t.Name.Local] = v
+					} else if a.Name.Local == "type" && a.Value == "QueryResult" {
+						v := &QueryResult{}
+						if err := d.DecodeElement(v, &t); err != nil {
+							return err
+						}
+						s.Fields[t.Name.Local] = v
 					}
 				} else {
 					var v string
