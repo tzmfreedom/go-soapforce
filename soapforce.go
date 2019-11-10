@@ -4791,11 +4791,6 @@ func (service *Soap) AddHeader(header interface{}) {
 	service.client.AddHeader(header)
 }
 
-// Backwards-compatible function: use AddHeader instead
-func (service *Soap) SetHeader(header interface{}) {
-	service.client.AddHeader(header)
-}
-
 func (service *Soap) ClearHeader() {
 	service.client.ClearHeader()
 }
