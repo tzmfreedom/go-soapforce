@@ -51,16 +51,6 @@ endif
 deps:
 	dep ensure
 
-.PHONY: glide
-glide:
-ifeq ($(shell command -v glide 2> /dev/null),)
-	curl https://glide.sh/get | sh
-endif
-
-.PHONY: deps
-deps: glide
-	glide install
-
 .PHONY: bin/$(NAME) 
 bin/$(NAME): $(SRCS)
 	go build -a -tags netgo -installsuffix netgo $(LDFLAGS) -o bin/$(NAME)
