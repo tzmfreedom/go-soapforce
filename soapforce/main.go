@@ -149,3 +149,24 @@ func undelete() {
 	pp.Print(sResult)
 
 }
+
+func login() {
+	client := soapforce.NewClient()
+	client.SetClientId(os.Getenv("SALESFORCE_CLIENT_ID"))
+	client.SetClientSecret(os.Getenv("SALESFORCE_CLIENT_SECRET"))
+	client.SetDebug(true)
+	err := client.LoginWithOAuth(os.Getenv("SALESFORCE_USERNAME"), os.Getenv("SALESFORCE_PASSWORD"))
+	if err != nil {
+		panic(err)
+	}
+}
+
+func refresh() {
+	client := soapforce.NewClient()
+	client.SetClientId(os.Getenv("SALESFORCE_CLIENT_ID"))
+	client.SetClientSecret(os.Getenv("SALESFORCE_CLIENT_SECRET"))
+	err := client.Refresh(os.Getenv("REFRESH_TOKEN"))
+	if err != nil {
+		panic(err)
+	}
+}
