@@ -1,8 +1,12 @@
 package soapforce
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 )
 
 const (
@@ -17,6 +21,8 @@ type Client struct {
 	LoginUrl   string
 	soapClient *Soap
 	sessionId  string
+	clientId string
+	clientSecret string
 }
 
 func NewClient() *Client {
@@ -81,6 +87,78 @@ func (c *Client) Login(u string, p string) (*LoginResult, error) {
 	}
 	c.soapClient.AddHeader(&sessionHeader)
 	return res.Result, nil
+}
+
+func (c *Client) SetClientId(clientId string) {
+	c.clientId = clientId
+}
+
+func (c *Client) SetClientSecret(clientSecret string) {
+	c.clientSecret = clientSecret
+}
+
+func (c *Client) LoginWithOAuth(username, password string) error {
+	params := url.Values{}
+	params.Add("grant_type", "password")
+	params.Add("client_id", c.clientId)
+	params.Add("client_secret", c.clientSecret)
+	params.Add("username", username)
+	params.Add("password", password)
+	resp, err := http.PostForm(fmt.Sprintf("https://%s/services/oauth2/token", c.LoginUrl), params)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	tokenResponse := map[string]string{}
+	err = json.Unmarshal(b, &tokenResponse)
+	if err != nil {
+		return err
+	}
+
+	c.sessionId = tokenResponse["access_token"]
+	c.ServerUrl = tokenResponse["instance_url"]
+	c.soapClient.SetServerUrl(c.ServerUrl)
+	sessionHeader := &SessionHeader{
+		SessionId: c.sessionId,
+	}
+	c.soapClient.AddHeader(&sessionHeader)
+	return nil
+}
+
+func (c *Client) Refresh(refreshToken string) error {
+	params := url.Values{}
+	params.Add("grant_type", "refresh_token")
+	params.Add("client_id", c.clientId)
+	params.Add("client_secret", c.clientSecret)
+	params.Add("refresh_token", refreshToken)
+	resp, err := http.PostForm(fmt.Sprintf("https://%s/services/oauth2/token", c.LoginUrl), params)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(b))
+	tokenResponse := map[string]string{}
+	err = json.Unmarshal(b, &tokenResponse)
+	if err != nil {
+		return err
+	}
+
+	c.sessionId = tokenResponse["access_token"]
+	c.ServerUrl = tokenResponse["instance_url"]
+	c.soapClient.SetServerUrl(c.ServerUrl)
+	sessionHeader := &SessionHeader{
+		SessionId: c.sessionId,
+	}
+	c.soapClient.AddHeader(&sessionHeader)
+	return nil
 }
 
 func (c *Client) Logout() error {

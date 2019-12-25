@@ -31,7 +31,7 @@ import:
 	go get golang.org/x/tools/cmd/goimports
 
 .PHONY: cross-build
-cross-build: deps
+cross-build:
 	-@goimports -w $(SRCS)
 	@gofmt -w $(SRCS)
 	@for os in darwin linux windows; do \
@@ -40,16 +40,6 @@ cross-build: deps
 	        -installsuffix netgo $(LDFLAGS) -o dist/$$os-$$arch/$(NAME); \
 	    done; \
 	done
-
-.PHONY: dep
-dep:
-ifeq ($(shell command -v dep 2> /dev/null),)
-	curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-endif
-
-.PHONY: deps
-deps:
-	dep ensure
 
 .PHONY: bin/$(NAME) 
 bin/$(NAME): $(SRCS)
