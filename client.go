@@ -16,11 +16,9 @@ const (
 
 type Client struct {
 	UserInfo   *GetUserInfoResult
-	ApiVersion string
-	ServerUrl  string
-	LoginUrl   string
+	apiVersion string
+	loginUrl   string
 	soapClient *Soap
-	sessionId  string
 	clientId string
 	clientSecret string
 }
@@ -29,18 +27,17 @@ func NewClient() *Client {
 	soap := NewSoap("", true, nil)
 	return &Client{
 		soapClient: soap,
-		ApiVersion: DefaultApiVersion,
-		LoginUrl:   DefaultLoginUrl,
+		apiVersion: DefaultApiVersion,
+		loginUrl:   DefaultLoginUrl,
 	}
 }
 
 func (c *Client) SetApiVersion(v string) {
-	c.ApiVersion = v
+	c.apiVersion = v
 	c.setLoginUrl()
 }
 
 func (c *Client) SetAccessToken(sid string) {
-	c.sessionId = sid
 	sessionHeader := &SessionHeader{
 		SessionId: sid,
 	}
@@ -48,12 +45,16 @@ func (c *Client) SetAccessToken(sid string) {
 }
 
 func (c *Client) SetLoginUrl(url string) {
-	c.LoginUrl = url
+	c.loginUrl = url
 	c.setLoginUrl()
 }
 
 func (c *Client) setLoginUrl() {
-	url := fmt.Sprintf("https://%s/services/Soap/u/%s", c.LoginUrl, c.ApiVersion)
+	url := fmt.Sprintf("https://%s/services/Soap/u/%s", c.loginUrl, c.apiVersion)
+	c.soapClient.SetServerUrl(url)
+}
+
+func (c *Client) SetServerUrl(url string) {
 	c.soapClient.SetServerUrl(url)
 }
 
@@ -78,8 +79,6 @@ func (c *Client) Login(u string, p string) (*LoginResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.sessionId = res.Result.SessionId
-	c.ServerUrl = res.Result.ServerUrl
 	c.soapClient.SetServerUrl(res.Result.ServerUrl)
 	c.UserInfo = res.Result.UserInfo
 	sessionHeader := &SessionHeader{
@@ -104,7 +103,7 @@ func (c *Client) LoginWithOAuth(username, password string) error {
 	params.Add("client_secret", c.clientSecret)
 	params.Add("username", username)
 	params.Add("password", password)
-	resp, err := http.PostForm(fmt.Sprintf("https://%s/services/oauth2/token", c.LoginUrl), params)
+	resp, err := http.PostForm(fmt.Sprintf("https://%s/services/oauth2/token", c.loginUrl), params)
 	if err != nil {
 		return err
 	}
@@ -119,13 +118,8 @@ func (c *Client) LoginWithOAuth(username, password string) error {
 		return err
 	}
 
-	c.sessionId = tokenResponse["access_token"]
-	c.ServerUrl = tokenResponse["instance_url"]
-	c.soapClient.SetServerUrl(c.ServerUrl)
-	sessionHeader := &SessionHeader{
-		SessionId: c.sessionId,
-	}
-	c.soapClient.AddHeader(&sessionHeader)
+	c.soapClient.SetServerUrl(tokenResponse["instance_url"])
+	c.SetAccessToken(tokenResponse["access_token"])
 	return nil
 }
 
@@ -135,7 +129,7 @@ func (c *Client) Refresh(refreshToken string) error {
 	params.Add("client_id", c.clientId)
 	params.Add("client_secret", c.clientSecret)
 	params.Add("refresh_token", refreshToken)
-	resp, err := http.PostForm(fmt.Sprintf("https://%s/services/oauth2/token", c.LoginUrl), params)
+	resp, err := http.PostForm(fmt.Sprintf("https://%s/services/oauth2/token", c.loginUrl), params)
 	if err != nil {
 		return err
 	}
@@ -144,20 +138,14 @@ func (c *Client) Refresh(refreshToken string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(b))
 	tokenResponse := map[string]string{}
 	err = json.Unmarshal(b, &tokenResponse)
 	if err != nil {
 		return err
 	}
 
-	c.sessionId = tokenResponse["access_token"]
-	c.ServerUrl = tokenResponse["instance_url"]
-	c.soapClient.SetServerUrl(c.ServerUrl)
-	sessionHeader := &SessionHeader{
-		SessionId: c.sessionId,
-	}
-	c.soapClient.AddHeader(&sessionHeader)
+	c.soapClient.SetServerUrl(tokenResponse["instance_url"])
+	c.SetAccessToken(tokenResponse["access_token"])
 	return nil
 }
 
@@ -166,8 +154,6 @@ func (c *Client) Logout() error {
 	if err != nil {
 		return err
 	}
-	c.sessionId = ""
-	c.ServerUrl = ""
 	c.setLoginUrl()
 	c.soapClient.ClearHeader()
 	return nil

@@ -5622,6 +5622,10 @@ func (service *Soap) SetServerUrl(url string) {
 	service.client.SetServerUrl(url)
 }
 
+func (service *Soap) GetServerUrl() string {
+	return service.client.GetServerUrl()
+}
+
 var timeout = time.Duration(30 * time.Second)
 
 func dialTimeout(network, addr string) (net.Conn, error) {
@@ -5916,6 +5920,10 @@ func (s *SOAPClient) Call(request, response interface{}) error {
 
 func (s *SOAPClient) SetServerUrl(url string) {
 	s.url = url
+}
+
+func (s *SOAPClient) GetServerUrl() string {
+	return s.url
 }
 
 func (s *SOAPClient) createRequest(buffer *bytes.Buffer) (*http.Request, error) {
