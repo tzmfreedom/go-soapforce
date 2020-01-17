@@ -15,11 +15,11 @@ const (
 )
 
 type Client struct {
-	UserInfo   *GetUserInfoResult
-	apiVersion string
-	loginUrl   string
-	soapClient *Soap
-	clientId string
+	UserInfo     *GetUserInfoResult
+	apiVersion   string
+	loginUrl     string
+	soapClient   *Soap
+	clientId     string
 	clientSecret string
 }
 

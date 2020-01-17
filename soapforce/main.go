@@ -72,6 +72,16 @@ func queryMore(ql string) string {
 	return res.QueryLocator
 }
 
+func aggregate() string {
+	client.SetBatchSize(200)
+	res, err := client.Query("SELECT Account.Name, COUNT(Id) FROM Contact GROUP BY Account.Name")
+	if err != nil {
+		panic(err)
+	}
+	pp.Print(res)
+	return res.QueryLocator
+}
+
 func create() {
 	sobjects := []*soapforce.SObject{
 		{
