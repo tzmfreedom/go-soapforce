@@ -118,7 +118,7 @@ func (c *Client) LoginWithOAuth(username, password string) error {
 		return err
 	}
 
-	c.soapClient.SetServerUrl(tokenResponse["instance_url"])
+	c.soapClient.SetServerUrl(fmt.Sprintf("%s/services/Soap/u/%s", tokenResponse["instance_url"], c.apiVersion))
 	c.SetAccessToken(tokenResponse["access_token"])
 	return nil
 }
@@ -144,7 +144,7 @@ func (c *Client) Refresh(refreshToken string) error {
 		return err
 	}
 
-	c.soapClient.SetServerUrl(tokenResponse["instance_url"])
+	c.soapClient.SetServerUrl(fmt.Sprintf("%s/services/Soap/u/%s", tokenResponse["instance_url"], c.apiVersion))
 	c.SetAccessToken(tokenResponse["access_token"])
 	return nil
 }
