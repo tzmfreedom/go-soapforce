@@ -478,7 +478,7 @@ type WsdlToApexResult struct {
 /* Compile one or more Apex Classes, Triggers, and run tests. */
 func (s *Soap) CompileAndTest(request *CompileAndTest) (*CompileAndTestResponse, error) {
 	response := new(CompileAndTestResponse)
-	err := s.client.Call(request, response)
+	err := s.client.Call(request, response, s.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -489,7 +489,7 @@ func (s *Soap) CompileAndTest(request *CompileAndTest) (*CompileAndTestResponse,
 /* Compile one or more Apex Classes. */
 func (s *Soap) CompileClasses(request *CompileClasses) (*CompileClassesResponse, error) {
 	response := new(CompileClassesResponse)
-	err := s.client.Call(request, response)
+	err := s.client.Call(request, response, s.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -500,7 +500,7 @@ func (s *Soap) CompileClasses(request *CompileClasses) (*CompileClassesResponse,
 /* Compile Apex Trigger code blocks. */
 func (s *Soap) CompileTriggers(request *CompileTriggers) (*CompileTriggersResponse, error) {
 	response := new(CompileTriggersResponse)
-	err := s.client.Call(request, response)
+	err := s.client.Call(request, response, s.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -511,7 +511,7 @@ func (s *Soap) CompileTriggers(request *CompileTriggers) (*CompileTriggersRespon
 /* Execute an anonymous Apex code block */
 func (s *Soap) ExecuteAnonymous(request *ExecuteAnonymous) (*ExecuteAnonymousResponse, error) {
 	response := new(ExecuteAnonymousResponse)
-	err := s.client.Call(request, response)
+	err := s.client.Call(request, response, s.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -522,7 +522,7 @@ func (s *Soap) ExecuteAnonymous(request *ExecuteAnonymous) (*ExecuteAnonymousRes
 /* Execute test methods */
 func (s *Soap) RunTests(request *RunTests) (*RunTestsResponse, error) {
 	response := new(RunTestsResponse)
-	err := s.client.Call(request, response)
+	err := s.client.Call(request, response, s.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -533,7 +533,7 @@ func (s *Soap) RunTests(request *RunTests) (*RunTestsResponse, error) {
 /* Generate Apex packages from WSDL for web s callouts */
 func (s *Soap) WsdlToApex(request *WsdlToApex) (*WsdlToApexResponse, error) {
 	response := new(WsdlToApexResponse)
-	err := s.client.Call(request, response)
+	err := s.client.Call(request, response, s.responseHeader)
 	if err != nil {
 		return nil, err
 	}

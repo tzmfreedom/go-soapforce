@@ -1998,7 +1998,7 @@ type DuplicateRuleHeader struct {
 type LimitInfoHeader struct {
 	XMLName xml.Name `xml:"urn:partner.soap.sforce.com LimitInfoHeader"`
 
-	LimitInfo []*LimitInfo `xml:"limitInfo,omitempty"`
+	LimitInfo *LimitInfo `xml:"limitInfo,omitempty"`
 }
 
 type MruHeader struct {
@@ -4769,6 +4769,7 @@ type MalformedSearchFault struct {
 
 type Soap struct {
 	client *SOAPClient
+	responseHeader *ResponseSOAPHeader
 }
 
 func NewSoap(url string, tls bool, auth *BasicAuth) *Soap {
@@ -4779,6 +4780,9 @@ func NewSoap(url string, tls bool, auth *BasicAuth) *Soap {
 
 	return &Soap{
 		client: client,
+		responseHeader: &ResponseSOAPHeader {
+			info: &LimitInfoHeader{},
+		},
 	}
 }
 
@@ -4797,6 +4801,13 @@ func (service *Soap) AddHeader(header interface{}) {
 	service.client.AddHeader(header)
 }
 
+func (service *Soap) SetHeader(headers []interface{}) {
+	service.ClearHeader()
+	for _, header := range headers {
+		service.AddHeader(header)
+	}
+}
+
 func (service *Soap) ClearHeader() {
 	service.client.ClearHeader()
 }
@@ -4813,6 +4824,10 @@ func (service *Soap) SetGzip(gz bool) {
 	service.client.SetGzip(gz)
 }
 
+func (service *Soap) GetInfo() *LimitInfoHeader {
+	return service.responseHeader.info
+}
+
 // Error can be either of the following types:
 //
 //   - LoginFault
@@ -4821,7 +4836,7 @@ func (service *Soap) SetGzip(gz bool) {
 /* Login to the Salesforce.com SOAP Api */
 func (service *Soap) Login(request *Login) (*LoginResponse, error) {
 	response := new(LoginResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -4836,7 +4851,7 @@ func (service *Soap) Login(request *Login) (*LoginResponse, error) {
 /* Describe an sObject */
 func (service *Soap) DescribeSObject(request *DescribeSObject) (*DescribeSObjectResponse, error) {
 	response := new(DescribeSObjectResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -4851,7 +4866,7 @@ func (service *Soap) DescribeSObject(request *DescribeSObject) (*DescribeSObject
 /* Describe multiple sObjects (upto 100) */
 func (service *Soap) DescribeSObjects(request *DescribeSObjects) (*DescribeSObjectsResponse, error) {
 	response := new(DescribeSObjectsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -4865,7 +4880,7 @@ func (service *Soap) DescribeSObjects(request *DescribeSObjects) (*DescribeSObje
 /* Describe the Global state */
 func (service *Soap) DescribeGlobal(request *DescribeGlobal) (*DescribeGlobalResponse, error) {
 	response := new(DescribeGlobalResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -4880,7 +4895,7 @@ func (service *Soap) DescribeGlobal(request *DescribeGlobal) (*DescribeGlobalRes
 /* Describe all the data category groups available for a given set of types */
 func (service *Soap) DescribeDataCategoryGroups(request *DescribeDataCategoryGroups) (*DescribeDataCategoryGroupsResponse, error) {
 	response := new(DescribeDataCategoryGroupsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -4895,7 +4910,7 @@ func (service *Soap) DescribeDataCategoryGroups(request *DescribeDataCategoryGro
 /* Describe the data category group structures for a given set of pair of types and data category group name */
 func (service *Soap) DescribeDataCategoryGroupStructures(request *DescribeDataCategoryGroupStructures) (*DescribeDataCategoryGroupStructuresResponse, error) {
 	response := new(DescribeDataCategoryGroupStructuresResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -4909,7 +4924,7 @@ func (service *Soap) DescribeDataCategoryGroupStructures(request *DescribeDataCa
 /* Describes your Knowledge settings, such as if knowledgeEnabled is on or off, its default language and supported languages */
 func (service *Soap) DescribeKnowledgeSettings(request *DescribeKnowledgeSettings) (*DescribeKnowledgeSettingsResponse, error) {
 	response := new(DescribeKnowledgeSettingsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -4924,7 +4939,7 @@ func (service *Soap) DescribeKnowledgeSettings(request *DescribeKnowledgeSetting
 /* Describe a list of FlexiPage and their contents */
 func (service *Soap) DescribeFlexiPages(request *DescribeFlexiPages) (*DescribeFlexiPagesResponse, error) {
 	response := new(DescribeFlexiPagesResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -4938,7 +4953,7 @@ func (service *Soap) DescribeFlexiPages(request *DescribeFlexiPages) (*DescribeF
 /* Describe the items in an AppMenu */
 func (service *Soap) DescribeAppMenu(request *DescribeAppMenu) (*DescribeAppMenuResponse, error) {
 	response := new(DescribeAppMenuResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -4952,7 +4967,7 @@ func (service *Soap) DescribeAppMenu(request *DescribeAppMenu) (*DescribeAppMenu
 /* Describe Gloal and Themes */
 func (service *Soap) DescribeGlobalTheme(request *DescribeGlobalTheme) (*DescribeGlobalThemeResponse, error) {
 	response := new(DescribeGlobalThemeResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -4966,7 +4981,7 @@ func (service *Soap) DescribeGlobalTheme(request *DescribeGlobalTheme) (*Describ
 /* Describe Themes */
 func (service *Soap) DescribeTheme(request *DescribeTheme) (*DescribeThemeResponse, error) {
 	response := new(DescribeThemeResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -4982,7 +4997,7 @@ func (service *Soap) DescribeTheme(request *DescribeTheme) (*DescribeThemeRespon
 /* Describe the layout of the given sObject or the given actionable global page. */
 func (service *Soap) DescribeLayout(request *DescribeLayout) (*DescribeLayoutResponse, error) {
 	response := new(DescribeLayoutResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -4996,7 +5011,7 @@ func (service *Soap) DescribeLayout(request *DescribeLayout) (*DescribeLayoutRes
 /* Describe the layout of the SoftPhone */
 func (service *Soap) DescribeSoftphoneLayout(request *DescribeSoftphoneLayout) (*DescribeSoftphoneLayoutResponse, error) {
 	response := new(DescribeSoftphoneLayoutResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5011,7 +5026,7 @@ func (service *Soap) DescribeSoftphoneLayout(request *DescribeSoftphoneLayout) (
 /* Describe the search view of an sObject */
 func (service *Soap) DescribeSearchLayouts(request *DescribeSearchLayouts) (*DescribeSearchLayoutsResponse, error) {
 	response := new(DescribeSearchLayoutsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5022,7 +5037,7 @@ func (service *Soap) DescribeSearchLayouts(request *DescribeSearchLayouts) (*Des
 /* Describe a list of entity names that reflects the current user's searchable entities */
 func (service *Soap) DescribeSearchableEntities(request *DescribeSearchableEntities) (*DescribeSearchableEntitiesResponse, error) {
 	response := new(DescribeSearchableEntitiesResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5033,7 +5048,7 @@ func (service *Soap) DescribeSearchableEntities(request *DescribeSearchableEntit
 /* Describe a list of objects representing the order and scope of objects on a users search result page */
 func (service *Soap) DescribeSearchScopeOrder(request *DescribeSearchScopeOrder) (*DescribeSearchScopeOrderResponse, error) {
 	response := new(DescribeSearchScopeOrderResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5044,7 +5059,7 @@ func (service *Soap) DescribeSearchScopeOrder(request *DescribeSearchScopeOrder)
 /* Describe the compact layouts of the given sObject */
 func (service *Soap) DescribeCompactLayouts(request *DescribeCompactLayouts) (*DescribeCompactLayoutsResponse, error) {
 	response := new(DescribeCompactLayoutsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5055,7 +5070,7 @@ func (service *Soap) DescribeCompactLayouts(request *DescribeCompactLayouts) (*D
 /* Describe the Path Assistants for the given sObject and optionally RecordTypes */
 func (service *Soap) DescribePathAssistants(request *DescribePathAssistants) (*DescribePathAssistantsResponse, error) {
 	response := new(DescribePathAssistantsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5066,7 +5081,7 @@ func (service *Soap) DescribePathAssistants(request *DescribePathAssistants) (*D
 /* Describe the approval layouts of the given sObject */
 func (service *Soap) DescribeApprovalLayout(request *DescribeApprovalLayout) (*DescribeApprovalLayoutResponse, error) {
 	response := new(DescribeApprovalLayoutResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5081,7 +5096,7 @@ func (service *Soap) DescribeApprovalLayout(request *DescribeApprovalLayout) (*D
 /* Describe the ListViews as SOQL metadata for the generation of SOQL. */
 func (service *Soap) DescribeSoqlListViews(request *DescribeSoqlListViews) (*DescribeSoqlListViewsResponse, error) {
 	response := new(DescribeSoqlListViewsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5092,7 +5107,7 @@ func (service *Soap) DescribeSoqlListViews(request *DescribeSoqlListViews) (*Des
 /* Execute the specified list view and return the presentation-ready results. */
 func (service *Soap) ExecuteListView(request *ExecuteListView) (*ExecuteListViewResponse, error) {
 	response := new(ExecuteListViewResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5107,7 +5122,7 @@ func (service *Soap) ExecuteListView(request *ExecuteListView) (*ExecuteListView
 /* Describe the ListViews of a SObject as SOQL metadata for the generation of SOQL. */
 func (service *Soap) DescribeSObjectListViews(request *DescribeSObjectListViews) (*DescribeSObjectListViewsResponse, error) {
 	response := new(DescribeSObjectListViewsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5121,7 +5136,7 @@ func (service *Soap) DescribeSObjectListViews(request *DescribeSObjectListViews)
 /* Describe the tabs that appear on a users page */
 func (service *Soap) DescribeTabs(request *DescribeTabs) (*DescribeTabsResponse, error) {
 	response := new(DescribeTabsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5135,7 +5150,7 @@ func (service *Soap) DescribeTabs(request *DescribeTabs) (*DescribeTabsResponse,
 /* Describe all tabs available to a user */
 func (service *Soap) DescribeAllTabs(request *DescribeAllTabs) (*DescribeAllTabsResponse, error) {
 	response := new(DescribeAllTabsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5146,7 +5161,7 @@ func (service *Soap) DescribeAllTabs(request *DescribeAllTabs) (*DescribeAllTabs
 /* Describe the primary compact layouts for the sObjects requested */
 func (service *Soap) DescribePrimaryCompactLayouts(request *DescribePrimaryCompactLayouts) (*DescribePrimaryCompactLayoutsResponse, error) {
 	response := new(DescribePrimaryCompactLayoutsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5163,7 +5178,7 @@ func (service *Soap) DescribePrimaryCompactLayouts(request *DescribePrimaryCompa
 /* Create a set of new sObjects */
 func (service *Soap) Create(request *Create) (*CreateResponse, error) {
 	response := new(CreateResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5180,7 +5195,7 @@ func (service *Soap) Create(request *Create) (*CreateResponse, error) {
 /* Update a set of sObjects */
 func (service *Soap) Update(request *Update) (*UpdateResponse, error) {
 	response := new(UpdateResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5197,7 +5212,7 @@ func (service *Soap) Update(request *Update) (*UpdateResponse, error) {
 /* Update or insert a set of sObjects based on object id */
 func (service *Soap) Upsert(request *Upsert) (*UpsertResponse, error) {
 	response := new(UpsertResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5214,7 +5229,7 @@ func (service *Soap) Upsert(request *Upsert) (*UpsertResponse, error) {
 /* Merge and update a set of sObjects based on object id */
 func (service *Soap) Merge(request *Merge) (*MergeResponse, error) {
 	response := new(MergeResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5228,7 +5243,7 @@ func (service *Soap) Merge(request *Merge) (*MergeResponse, error) {
 /* Delete a set of sObjects */
 func (service *Soap) Delete(request *Delete) (*DeleteResponse, error) {
 	response := new(DeleteResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5242,7 +5257,7 @@ func (service *Soap) Delete(request *Delete) (*DeleteResponse, error) {
 /* Undelete a set of sObjects */
 func (service *Soap) Undelete(request *Undelete) (*UndeleteResponse, error) {
 	response := new(UndeleteResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5256,7 +5271,7 @@ func (service *Soap) Undelete(request *Undelete) (*UndeleteResponse, error) {
 /* Empty a set of sObjects from the recycle bin */
 func (service *Soap) EmptyRecycleBin(request *EmptyRecycleBin) (*EmptyRecycleBinResponse, error) {
 	response := new(EmptyRecycleBinResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5274,7 +5289,7 @@ func (service *Soap) EmptyRecycleBin(request *EmptyRecycleBin) (*EmptyRecycleBin
 /* Get a set of sObjects */
 func (service *Soap) Retrieve(request *Retrieve) (*RetrieveResponse, error) {
 	response := new(RetrieveResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5289,7 +5304,7 @@ func (service *Soap) Retrieve(request *Retrieve) (*RetrieveResponse, error) {
 /* Submit an entity to a workflow process or process a workitem */
 func (service *Soap) Process(request *Process) (*ProcessResponse, error) {
 	response := new(ProcessResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5303,7 +5318,7 @@ func (service *Soap) Process(request *Process) (*ProcessResponse, error) {
 /* convert a set of leads */
 func (service *Soap) ConvertLead(request *ConvertLead) (*ConvertLeadResponse, error) {
 	response := new(ConvertLeadResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5317,7 +5332,7 @@ func (service *Soap) ConvertLead(request *ConvertLead) (*ConvertLeadResponse, er
 /* Logout the current user, invalidating the current session. */
 func (service *Soap) Logout(request *Logout) (*LogoutResponse, error) {
 	response := new(LogoutResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5331,7 +5346,7 @@ func (service *Soap) Logout(request *Logout) (*LogoutResponse, error) {
 /* Logs out and invalidates session ids */
 func (service *Soap) InvalidateSessions(request *InvalidateSessions) (*InvalidateSessionsResponse, error) {
 	response := new(InvalidateSessionsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5346,7 +5361,7 @@ func (service *Soap) InvalidateSessions(request *InvalidateSessions) (*Invalidat
 /* Get the IDs for deleted sObjects */
 func (service *Soap) GetDeleted(request *GetDeleted) (*GetDeletedResponse, error) {
 	response := new(GetDeletedResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5361,7 +5376,7 @@ func (service *Soap) GetDeleted(request *GetDeleted) (*GetDeletedResponse, error
 /* Get the IDs for updated sObjects */
 func (service *Soap) GetUpdated(request *GetUpdated) (*GetUpdatedResponse, error) {
 	response := new(GetUpdatedResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5380,7 +5395,7 @@ func (service *Soap) GetUpdated(request *GetUpdated) (*GetUpdatedResponse, error
 /* Create a Query Cursor */
 func (service *Soap) Query(request *Query) (*QueryResponse, error) {
 	response := new(QueryResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5399,7 +5414,7 @@ func (service *Soap) Query(request *Query) (*QueryResponse, error) {
 /* Create a Query Cursor, including deleted sObjects */
 func (service *Soap) QueryAll(request *QueryAll) (*QueryAllResponse, error) {
 	response := new(QueryAllResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5416,7 +5431,7 @@ func (service *Soap) QueryAll(request *QueryAll) (*QueryAllResponse, error) {
 /* Gets the next batch of sObjects from a query */
 func (service *Soap) QueryMore(request *QueryMore) (*QueryMoreResponse, error) {
 	response := new(QueryMoreResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5433,7 +5448,7 @@ func (service *Soap) QueryMore(request *QueryMore) (*QueryMoreResponse, error) {
 /* Search for sObjects */
 func (service *Soap) Search(request *Search) (*SearchResponse, error) {
 	response := new(SearchResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5447,7 +5462,7 @@ func (service *Soap) Search(request *Search) (*SearchResponse, error) {
 /* Gets server timestamp */
 func (service *Soap) GetServerTimestamp(request *GetServerTimestamp) (*GetServerTimestampResponse, error) {
 	response := new(GetServerTimestampResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5463,7 +5478,7 @@ func (service *Soap) GetServerTimestamp(request *GetServerTimestamp) (*GetServer
 /* Set a user's password */
 func (service *Soap) SetPassword(request *SetPassword) (*SetPasswordResponse, error) {
 	response := new(SetPasswordResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5478,7 +5493,7 @@ func (service *Soap) SetPassword(request *SetPassword) (*SetPasswordResponse, er
 /* Reset a user's password */
 func (service *Soap) ResetPassword(request *ResetPassword) (*ResetPasswordResponse, error) {
 	response := new(ResetPasswordResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5492,7 +5507,7 @@ func (service *Soap) ResetPassword(request *ResetPassword) (*ResetPasswordRespon
 /* Returns standard information relevant to the current user */
 func (service *Soap) GetUserInfo(request *GetUserInfo) (*GetUserInfoResponse, error) {
 	response := new(GetUserInfoResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5506,7 +5521,7 @@ func (service *Soap) GetUserInfo(request *GetUserInfo) (*GetUserInfoResponse, er
 /* Send existing draft EmailMessage */
 func (service *Soap) SendEmailMessage(request *SendEmailMessage) (*SendEmailMessageResponse, error) {
 	response := new(SendEmailMessageResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5520,7 +5535,7 @@ func (service *Soap) SendEmailMessage(request *SendEmailMessage) (*SendEmailMess
 /* Send outbound email */
 func (service *Soap) SendEmail(request *SendEmail) (*SendEmailResponse, error) {
 	response := new(SendEmailResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5534,7 +5549,7 @@ func (service *Soap) SendEmail(request *SendEmail) (*SendEmailResponse, error) {
 /* Perform a template merge on one or more blocks of text. */
 func (service *Soap) RenderEmailTemplate(request *RenderEmailTemplate) (*RenderEmailTemplateResponse, error) {
 	response := new(RenderEmailTemplateResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5545,7 +5560,7 @@ func (service *Soap) RenderEmailTemplate(request *RenderEmailTemplate) (*RenderE
 /* Perform a series of predefined actions such as quick create or log a task */
 func (service *Soap) PerformQuickActions(request *PerformQuickActions) (*PerformQuickActionsResponse, error) {
 	response := new(PerformQuickActionsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5556,7 +5571,7 @@ func (service *Soap) PerformQuickActions(request *PerformQuickActions) (*Perform
 /* Describe the details of a series of quick actions */
 func (service *Soap) DescribeQuickActions(request *DescribeQuickActions) (*DescribeQuickActionsResponse, error) {
 	response := new(DescribeQuickActionsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5567,7 +5582,7 @@ func (service *Soap) DescribeQuickActions(request *DescribeQuickActions) (*Descr
 /* Describe the details of a series of quick actions available for the given contextType */
 func (service *Soap) DescribeAvailableQuickActions(request *DescribeAvailableQuickActions) (*DescribeAvailableQuickActionsResponse, error) {
 	response := new(DescribeAvailableQuickActionsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5578,7 +5593,7 @@ func (service *Soap) DescribeAvailableQuickActions(request *DescribeAvailableQui
 /* Retreive the template sobjects, if appropriate, for the given quick action names in a given context */
 func (service *Soap) RetrieveQuickActionTemplates(request *RetrieveQuickActionTemplates) (*RetrieveQuickActionTemplatesResponse, error) {
 	response := new(RetrieveQuickActionTemplatesResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5589,7 +5604,7 @@ func (service *Soap) RetrieveQuickActionTemplates(request *RetrieveQuickActionTe
 /* Describe visualforce for an org */
 func (service *Soap) DescribeVisualForce(request *DescribeVisualForce) (*DescribeVisualForceResponse, error) {
 	response := new(DescribeVisualForceResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5605,7 +5620,7 @@ func (service *Soap) DescribeVisualForce(request *DescribeVisualForce) (*Describ
 /* Find duplicates for a set of sObjects */
 func (service *Soap) FindDuplicates(request *FindDuplicates) (*FindDuplicatesResponse, error) {
 	response := new(FindDuplicatesResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5616,7 +5631,7 @@ func (service *Soap) FindDuplicates(request *FindDuplicates) (*FindDuplicatesRes
 /* Return the renameable nouns from the server for use in presentation using the salesforce grammar engine */
 func (service *Soap) DescribeNouns(request *DescribeNouns) (*DescribeNounsResponse, error) {
 	response := new(DescribeNounsResponse)
-	err := service.client.Call(request, response)
+	err := service.client.Call(request, response, service.responseHeader)
 	if err != nil {
 		return nil, err
 	}
@@ -5648,6 +5663,11 @@ type SOAPHeader struct {
 	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"`
 
 	Items []interface{} `xml:",omitempty"`
+	response *ResponseSOAPHeader
+}
+
+type ResponseSOAPHeader struct {
+	info *LimitInfoHeader
 }
 
 type SOAPBody struct {
@@ -5762,6 +5782,43 @@ func NewWSSSecurityHeader(user, pass, mustUnderstand string) *WSSSecurityHeader 
 	return hdr
 }
 
+func (b *SOAPHeader) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var (
+		token    xml.Token
+		err      error
+		consumed bool
+	)
+
+Loop:
+	for {
+		if token, err = d.Token(); err != nil {
+			return err
+		}
+
+		if token == nil {
+			break
+		}
+
+		switch se := token.(type) {
+		case xml.StartElement:
+			if consumed {
+				return xml.UnmarshalError("Found multiple elements inside SOAP body; not wrapped-document/literal WS-I compliant")
+			} else {
+				if se.Name.Local == "LimitInfoHeader" && b.response.info != nil {
+					if err = d.DecodeElement(b.response.info, &se); err != nil {
+						return err
+					}
+				}
+
+				consumed = true
+			}
+		case xml.EndElement:
+			break Loop
+		}
+	}
+	return nil
+}
+
 func (b *SOAPBody) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	if b.Content == nil {
 		return xml.UnmarshalError("Content must be a pointer to a struct")
@@ -5854,7 +5911,7 @@ func (s *SOAPClient) ClearHeader() {
 	s.headers = nil
 }
 
-func (s *SOAPClient) Call(request, response interface{}) error {
+func (s *SOAPClient) Call(request, response interface{}, responseHeader *ResponseSOAPHeader) error {
 	envelope := SOAPEnvelope{}
 
 	if s.headers != nil && len(s.headers) > 0 {
@@ -5910,6 +5967,9 @@ func (s *SOAPClient) Call(request, response interface{}) error {
 	}
 
 	respEnvelope := new(SOAPEnvelope)
+	responseHeader.info = &LimitInfoHeader{}
+	header := SOAPHeader{response: responseHeader}
+	respEnvelope.Header = &header
 	respEnvelope.Body = SOAPBody{Content: response}
 	err = xml.Unmarshal(rawbody, respEnvelope)
 	if err != nil {

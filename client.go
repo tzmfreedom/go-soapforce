@@ -15,12 +15,15 @@ const (
 )
 
 type Client struct {
-	UserInfo     *GetUserInfoResult
-	apiVersion   string
-	loginUrl     string
-	soapClient   *Soap
-	clientId     string
-	clientSecret string
+	UserInfo        *GetUserInfoResult
+	apiVersion      string
+	batchSize       int32
+	debugCategories []*LogInfo
+	sessionId       string
+	loginUrl        string
+	soapClient      *Soap
+	clientId        string
+	clientSecret    string
 }
 
 func NewClient() *Client {
@@ -38,10 +41,8 @@ func (c *Client) SetApiVersion(v string) {
 }
 
 func (c *Client) SetAccessToken(sid string) {
-	sessionHeader := &SessionHeader{
-		SessionId: sid,
-	}
-	c.soapClient.AddHeader(&sessionHeader)
+	c.sessionId = sid
+	c.setHeaders()
 }
 
 func (c *Client) SetLoginUrl(url string) {
@@ -81,10 +82,7 @@ func (c *Client) Login(u string, p string) (*LoginResult, error) {
 	}
 	c.soapClient.SetServerUrl(res.Result.ServerUrl)
 	c.UserInfo = res.Result.UserInfo
-	sessionHeader := &SessionHeader{
-		SessionId: res.Result.SessionId,
-	}
-	c.soapClient.AddHeader(&sessionHeader)
+	c.SetAccessToken(res.Result.SessionId)
 	return res.Result, nil
 }
 
@@ -272,17 +270,33 @@ func (c *Client) Retrieve(s string, ids []string, fieldList string) ([]*SObject,
 }
 
 func (c *Client) SetBatchSize(size int) {
-	queryOptions := &QueryOptions{
-		BatchSize: int32(size),
-	}
-	c.soapClient.AddHeader(&queryOptions)
+	c.batchSize = int32(size)
+	c.setHeaders()
 }
 
 func (c *Client) SetDebuggingHeader(categories []*LogInfo) {
-	debuggingHeaders := &DebuggingHeader{
-		Categories: categories,
+	c.debugCategories = categories
+	c.setHeaders()
+}
+
+func (c *Client) setHeaders() {
+	var headers []interface{}
+	if c.debugCategories != nil {
+		headers = append(headers, &DebuggingHeader{
+			Categories: c.debugCategories,
+		})
 	}
-	c.soapClient.AddHeader(&debuggingHeaders)
+	if c.batchSize > 0 {
+		headers = append(headers, &QueryOptions{
+			BatchSize: int32(c.batchSize),
+		})
+	}
+	if c.sessionId != "" {
+		headers = append(headers, &SessionHeader{
+			SessionId: c.sessionId,
+		})
+	}
+	c.soapClient.SetHeader(headers)
 }
 
 func (c *Client) Query(q string) (*QueryResult, error) {
@@ -443,4 +457,8 @@ func (c *Client) SendEmail(m *Email) (*SendEmailResult, error) {
 		return nil, err
 	}
 	return res.Result, nil
+}
+
+func (c *Client) GetInfo() *LimitInfoHeader {
+	return c.soapClient.GetInfo()
 }
