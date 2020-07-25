@@ -16,42 +16,42 @@ const (
 
 type Client struct {
 	UserInfo        *GetUserInfoResult
-	apiVersion      string
-	batchSize       int32
-	debugCategories []*LogInfo
-	sessionId       string
-	loginUrl        string
+	ApiVersion      string
+	BatchSize       int32
+	DebugCategories []*LogInfo
+	SessionId       string
+	LoginUrl        string
+	ClientID        string
+	ClientSecret    string
 	soapClient      *Soap
-	clientId        string
-	clientSecret    string
 }
 
 func NewClient() *Client {
 	soap := NewSoap("", true, nil)
 	return &Client{
 		soapClient: soap,
-		apiVersion: DefaultApiVersion,
-		loginUrl:   DefaultLoginUrl,
+		ApiVersion: DefaultApiVersion,
+		LoginUrl:   DefaultLoginUrl,
 	}
 }
 
 func (c *Client) SetApiVersion(v string) {
-	c.apiVersion = v
+	c.ApiVersion = v
 	c.setLoginUrl()
 }
 
 func (c *Client) SetAccessToken(sid string) {
-	c.sessionId = sid
+	c.SessionId = sid
 	c.setHeaders()
 }
 
 func (c *Client) SetLoginUrl(url string) {
-	c.loginUrl = url
+	c.LoginUrl = url
 	c.setLoginUrl()
 }
 
 func (c *Client) setLoginUrl() {
-	url := fmt.Sprintf("https://%s/services/Soap/u/%s", c.loginUrl, c.apiVersion)
+	url := fmt.Sprintf("https://%s/services/Soap/u/%s", c.LoginUrl, c.ApiVersion)
 	c.soapClient.SetServerUrl(url)
 }
 
@@ -86,22 +86,22 @@ func (c *Client) Login(u string, p string) (*LoginResult, error) {
 	return res.Result, nil
 }
 
-func (c *Client) SetClientId(clientId string) {
-	c.clientId = clientId
+func (c *Client) SetClientId(ClientID string) {
+	c.ClientID = ClientID
 }
 
-func (c *Client) SetClientSecret(clientSecret string) {
-	c.clientSecret = clientSecret
+func (c *Client) SetClientSecret(ClientSecret string) {
+	c.ClientSecret = ClientSecret
 }
 
 func (c *Client) LoginWithOAuth(username, password string) error {
 	params := url.Values{}
 	params.Add("grant_type", "password")
-	params.Add("client_id", c.clientId)
-	params.Add("client_secret", c.clientSecret)
+	params.Add("client_id", c.ClientID)
+	params.Add("client_secret", c.ClientSecret)
 	params.Add("username", username)
 	params.Add("password", password)
-	resp, err := http.PostForm(fmt.Sprintf("https://%s/services/oauth2/token", c.loginUrl), params)
+	resp, err := http.PostForm(fmt.Sprintf("https://%s/services/oauth2/token", c.LoginUrl), params)
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func (c *Client) LoginWithOAuth(username, password string) error {
 		return err
 	}
 
-	c.soapClient.SetServerUrl(fmt.Sprintf("%s/services/Soap/u/%s", tokenResponse["instance_url"], c.apiVersion))
+	c.soapClient.SetServerUrl(fmt.Sprintf("%s/services/Soap/u/%s", tokenResponse["instance_url"], c.ApiVersion))
 	c.SetAccessToken(tokenResponse["access_token"])
 	return nil
 }
@@ -124,10 +124,10 @@ func (c *Client) LoginWithOAuth(username, password string) error {
 func (c *Client) Refresh(refreshToken string) error {
 	params := url.Values{}
 	params.Add("grant_type", "refresh_token")
-	params.Add("client_id", c.clientId)
-	params.Add("client_secret", c.clientSecret)
+	params.Add("client_id", c.ClientID)
+	params.Add("client_secret", c.ClientSecret)
 	params.Add("refresh_token", refreshToken)
-	resp, err := http.PostForm(fmt.Sprintf("https://%s/services/oauth2/token", c.loginUrl), params)
+	resp, err := http.PostForm(fmt.Sprintf("https://%s/services/oauth2/token", c.LoginUrl), params)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func (c *Client) Refresh(refreshToken string) error {
 		return err
 	}
 
-	c.soapClient.SetServerUrl(fmt.Sprintf("%s/services/Soap/u/%s", tokenResponse["instance_url"], c.apiVersion))
+	c.soapClient.SetServerUrl(fmt.Sprintf("%s/services/Soap/u/%s", tokenResponse["instance_url"], c.ApiVersion))
 	c.SetAccessToken(tokenResponse["access_token"])
 	return nil
 }
@@ -270,30 +270,30 @@ func (c *Client) Retrieve(s string, ids []string, fieldList string) ([]*SObject,
 }
 
 func (c *Client) SetBatchSize(size int) {
-	c.batchSize = int32(size)
+	c.BatchSize = int32(size)
 	c.setHeaders()
 }
 
 func (c *Client) SetDebuggingHeader(categories []*LogInfo) {
-	c.debugCategories = categories
+	c.DebugCategories = categories
 	c.setHeaders()
 }
 
 func (c *Client) setHeaders() {
 	var headers []interface{}
-	if c.debugCategories != nil {
+	if c.DebugCategories != nil {
 		headers = append(headers, &DebuggingHeader{
-			Categories: c.debugCategories,
+			Categories: c.DebugCategories,
 		})
 	}
-	if c.batchSize > 0 {
+	if c.BatchSize > 0 {
 		headers = append(headers, &QueryOptions{
-			BatchSize: int32(c.batchSize),
+			BatchSize: int32(c.BatchSize),
 		})
 	}
-	if c.sessionId != "" {
+	if c.SessionId != "" {
 		headers = append(headers, &SessionHeader{
-			SessionId: c.sessionId,
+			SessionId: c.SessionId,
 		})
 	}
 	c.soapClient.SetHeader(headers)
